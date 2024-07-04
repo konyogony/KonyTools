@@ -9,7 +9,7 @@ client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName === 'get-data') {
         interaction.reply({
-            embeds: [await createEmbed('KonyOgony')],
+            embeds: [await createEmbed(interaction.options.getString('username', true))],
         });
     }
 });

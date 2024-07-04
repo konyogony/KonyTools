@@ -1,13 +1,9 @@
-import { REST, Routes } from 'discord.js';
+import { ApplicationCommandOptionType, REST, Routes } from 'discord.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-if (
-    !process.env.DISCORD_TOKEN ||
-    !process.env.CLIENT_ID ||
-    !process.env.GUILD_ID
-) {
+if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
     throw new Error('.env fucked up');
 }
 
@@ -15,8 +11,18 @@ const commands = [
     {
         name: 'get-data',
         description: 'Retrive faceit and steam data',
+        options: [
+            {
+                name: 'username',
+                description: 'Their faceit username',
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+        ],
     },
 ];
+
+
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 

@@ -91,7 +91,7 @@ export const createEmbed = async (playerID: string) => {
                 )}:f>](https://www.faceit.com/en/players/${faceit_data.nickname})`,
             },
             {
-                name: 'Joined steam',
+                name: 'Joined Steam',
                 value: `[<t:${user_data.response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             }
         );
