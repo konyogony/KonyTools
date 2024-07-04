@@ -1,19 +1,21 @@
 {
-    "name": "kony_ds_tools",
-    "module": "index.ts",
-    "type": "module",
-    "devDependencies": {
-        "@types/bun": "latest"
-    },
-    "peerDependencies": {
-        "typescript": "^5.5.3"
-    },
-    "dependencies": {
-        "@types/dotenv": "^8.2.0",
-        "discord.js": "^14.15.3",
-        "dotenv": "^16.4.5"
-    },
-    "scripts": {
-        "dev": "bun run index.ts"
-    }
+  "name": "kony_ds_tools",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "axios": "^1.7.2",
+    "dayjs": "^1.11.11",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts"
+  }
 }
