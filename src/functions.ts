@@ -33,12 +33,19 @@ const getEloStats = (elo: number): { level: number; color: ColorResolvable } => 
 };
 
 export const getFaceitData = async (playerID: string) => {
-    return faceitApi
+    const faceit_data = await faceitApi
         .get(`/players?nickname=${playerID}`)
         .then((response) => {
             return response.data;
         })
         .catch((error) => console.log(error));
+    const match_data = await faceitApi
+        .get(`/players/${playerID}/history`)
+        .then((response) => {
+            return response.data;
+        })
+        .catch((error) => console.log(error));
+    return [faceit_data, match_data];
 };
 
 export const getSteamData = async (steamID: string) => {
@@ -58,9 +65,9 @@ export const getSteamData = async (steamID: string) => {
 };
 
 export const createEmbed = async (playerID: string) => {
-    const faceit_data = await getFaceitData(playerID);
+    const [faceit_data, match_data] = await getFaceitData(playerID);
     const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
-    console.log(game_data, user_data, faceit_data);
+    console.log(game_data, user_data, faceit_data, match_data);
     return new EmbedBuilder()
         .setColor(getEloStats(faceit_data.games.cs2.faceit_elo).color)
         .setTitle(faceit_data.steam_nickname)
@@ -95,4 +102,8 @@ export const createEmbed = async (playerID: string) => {
                 value: `[<t:${user_data.response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             }
         );
+    // .addFields({
+    //     name: 'In game now',
+    //     value: faceit_data.steam_id_64,
+    // });
 };

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, REST, Routes } from 'discord.js';
+import { REST, Routes } from 'discord.js';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,20 +9,10 @@ if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
 
 const commands = [
     {
-        name: 'get-data',
-        description: 'Retrive faceit and steam data',
-        options: [
-            {
-                name: 'username',
-                description: 'Their faceit username',
-                type: ApplicationCommandOptionType.String,
-                required: true,
-            },
-        ],
+        name: 'check-kony',
+        description: "check kony's stats",
     },
 ];
-
-
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
 
