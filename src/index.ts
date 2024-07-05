@@ -7,9 +7,14 @@ import config from './utils/config';
 dotenv.config();
 
 const client = new Client({
-    intents: [],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.DirectMessageReactions,
+    ],
 });
-
 client.once('ready', () => {
     if (!client.user) return;
 
