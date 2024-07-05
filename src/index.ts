@@ -1,5 +1,5 @@
 import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
-import { getEloStats, getFaceitData } from './utils/util';
+import { getEloStats, getFaceitData, timeSince } from './utils/util';
 import * as dotenv from 'dotenv';
 import { readdirSync } from 'node:fs';
 import config from './utils/config';
@@ -7,7 +7,7 @@ import config from './utils/config';
 dotenv.config();
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers],
+    intents: [],
 });
 
 client.once('ready', () => {
@@ -16,7 +16,7 @@ client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 
     client.user.setActivity({
-        name: 'starting bot...',
+        name: '🕒 Please wait...',
         type: ActivityType.Custom,
         state: '',
     });
@@ -38,7 +38,7 @@ const updateStatuses = async () => {
             state: '',
         },
         {
-            name: '🚨 IN GAME 🚨',
+            name: `🚨 IN GAME FOR ${setInterval(() => timeSince(match.items[0].started_at), 1000)}🚨`,
             type: ActivityType.Custom,
             state: '',
         },
@@ -49,7 +49,7 @@ const updateStatuses = async () => {
             statusInterval = setInterval(() => {
                 client.user?.setActivity(statuses[statusIndex]);
                 statusIndex = (statusIndex + 1) % statuses.length;
-            }, 2000);
+            }, 4000);
         }
     } else {
         if (statusInterval) {

@@ -67,6 +67,25 @@ export const getSteamData = async (steamID: string) => {
     return [game_data, user_data];
 };
 
+export const timeSince = (timestamp: number): string => {
+    const now = Date.now();
+    const past = timestamp * 1000;
+    const elapsed = now - past;
+
+    const seconds = Math.floor(elapsed / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+
+    const displaySeconds = seconds % 60;
+    const displayMinutes = minutes % 60;
+
+    if (hours > 0) {
+        return `${hours}:${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+    } else {
+        return `${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`;
+    }
+};
+
 // Ignore
 
 // const [faceit_data, match_data] = await getFaceitData('KonyOgony');
