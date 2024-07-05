@@ -1,4 +1,4 @@
-import { ActivityType, Client } from 'discord.js';
+import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
 import { getEloStats, getFaceitData } from './utils/util';
 import * as dotenv from 'dotenv';
 import { readdirSync } from 'node:fs';
@@ -6,7 +6,9 @@ import config from './utils/config';
 
 dotenv.config();
 
-const client = new Client({ intents: [] });
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers],
+});
 
 client.once('ready', () => {
     if (!client.user) return;
@@ -20,11 +22,15 @@ client.once('ready', () => {
     });
 });
 
-setInterval(async () => {
+let statusIndex = 0;
+let statusInterval: ReturnType<typeof setInterval> | null = null;
+
+const updateStatuses = async () => {
     if (!client.user) return;
 
     const [data, match] = await getFaceitData('KonyOgony');
     const elo = data.games.cs2.faceit_elo;
+
     const statuses = [
         {
             name: `🎮 ELO: ${elo} | LVL ${getEloStats(elo).level}`,
@@ -32,16 +38,29 @@ setInterval(async () => {
             state: '',
         },
         {
-            name: `🚨 IN GAME 🚨`,
+            name: '🚨 IN GAME 🚨',
             type: ActivityType.Custom,
             state: '',
         },
     ];
 
-    client.user.setActivity(
-        match.items[0].status !== 'finished' ? statuses[Math.floor(Math.random() * statuses.length)] : statuses[0],
-    );
-}, 10 * 1000);
+    if (match.items[0].status !== 'finished') {
+        if (!statusInterval) {
+            statusInterval = setInterval(() => {
+                client.user?.setActivity(statuses[statusIndex]);
+                statusIndex = (statusIndex + 1) % statuses.length;
+            }, 2000);
+        }
+    } else {
+        if (statusInterval) {
+            clearInterval(statusInterval);
+            statusInterval = null;
+        }
+        client.user?.setActivity(statuses[0]);
+    }
+};
+
+setInterval(updateStatuses, 10000);
 
 const eventFiles = readdirSync(`${__dirname}/events/`).filter((x) => x.endsWith('.ts'));
 console.log(eventFiles);

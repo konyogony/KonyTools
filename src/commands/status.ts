@@ -1,12 +1,11 @@
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-export const options = new SlashCommandBuilder().setName('check-kony').setDescription("Get kony's stats").toJSON();
+export const options = new SlashCommandBuilder().setName('status').setDescription("Get kony's stats").toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const [faceit_data, match_data] = await getFaceitData('KonyOgony');
     const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
-    console.log(game_data, user_data, faceit_data, match_data);
     const embed = new EmbedBuilder()
         .setColor(getEloStats(faceit_data.games.cs2.faceit_elo).color)
         .setTitle(faceit_data.steam_nickname)
@@ -47,7 +46,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             name: 'In game now',
             value: `Started <t:${Math.floor(
                 match_data.items[0].started_at / 1000,
-            )}:f>, current in [Room](https://www.faceit.com/en/cs2/room/${match_data.items[0].match_id})`,
+            )}:f>, currently in [this](https://www.faceit.com/en/cs2/room/${match_data.items[0].match_id}) room`,
         });
 
     return interaction.reply({ embeds: [embed] });
