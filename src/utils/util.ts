@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { type ColorResolvable } from 'discord.js';
+import config from './config';
 // import fs from 'fs';
 // import path from 'path';
 
 const faceitApi = axios.create({
     baseURL: 'https://open.faceit.com/data/v4',
     headers: {
-        Authorization: `Bearer ${process.env.FACEIT_KEY}`,
+        Authorization: `Bearer ${config.faceit_key}`,
     },
 });
 
@@ -53,13 +54,13 @@ export const getFaceitData = async (playerID: string) => {
 export const getSteamData = async (steamID: string) => {
     const game_data = await axios
         .get(
-            `http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=${process.env.STEAM_KEY}&steamid=${steamID}`
+            `http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=${config.steam_key}&steamid=${steamID}`,
         )
         .then(({ data }) => data)
         .catch((error) => console.log(error));
     const user_data = await axios
         .get(
-            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_KEY}&steamids=${steamID}`
+            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${config.steam_key}&steamids=${steamID}`,
         )
         .then(({ data }) => data)
         .catch((error) => console.log(error));

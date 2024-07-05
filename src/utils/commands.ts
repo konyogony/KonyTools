@@ -1,4 +1,5 @@
 import type { Interaction } from 'discord.js';
+import { readdirSync } from 'node:fs';
 
 export default async (interaction: Interaction<'cached'>) => {
     if (!interaction.isChatInputCommand()) return;
@@ -12,7 +13,7 @@ export default async (interaction: Interaction<'cached'>) => {
             if (!interaction.replied) {
                 await interaction.reply({ content: 'error', ephemeral: true });
             } else {
-                await interaction.editReply({ content: 'error', ephemeral: true });
+                await interaction.editReply('error');
             }
         } catch {
             await interaction.channel!.send('error').catch(() => null);
