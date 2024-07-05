@@ -8,7 +8,7 @@ dotenv.config();
 
 const client = new Client({ intents: [] });
 
-client.on('ready', () => {
+client.once('ready', () => {
     if (!client.user) return;
 
     console.log(`Logged in as ${client.user.tag}!`);
@@ -18,28 +18,33 @@ client.on('ready', () => {
         type: ActivityType.Custom,
         state: '',
     });
-
-    setInterval(async () => {
-        if (!client.user) return;
-
-        const [data, match] = await getFaceitData('KonyOgony');
-        const elo = data.games.cs2.faceit_elo;
-        const statuses = [
-            {
-                name: `🎮 ELO: ${elo} | LVL ${getEloStats(elo).level}`,
-                type: ActivityType.Custom,
-                state: '',
-            },
-            {
-                name: `🚨 IN GAME 🚨`,
-                type: ActivityType.Custom,
-                state: '',
-            },
-        ];
-    }, 60000);
 });
 
-const eventFiles = readdirSync(`${__dirname}/events/`).filter((x) => x.endsWith('.js')); // .ts
+setInterval(async () => {
+    if (!client.user) return;
+
+    const [data, match] = await getFaceitData('KonyOgony');
+    const elo = data.games.cs2.faceit_elo;
+    const statuses = [
+        {
+            name: `🎮 ELO: ${elo} | LVL ${getEloStats(elo).level}`,
+            type: ActivityType.Custom,
+            state: '',
+        },
+        {
+            name: `🚨 IN GAME 🚨`,
+            type: ActivityType.Custom,
+            state: '',
+        },
+    ];
+
+    client.user.setActivity(
+        match.items[0].status !== 'finished' ? statuses[Math.floor(Math.random() * statuses.length)] : statuses[0],
+    );
+}, 10 * 1000);
+
+const eventFiles = readdirSync(`${__dirname}/events/`).filter((x) => x.endsWith('.ts'));
+console.log(eventFiles);
 for (const filename of eventFiles) {
     const file = require(`./events/${filename}`);
     const name = filename.split('.')[0]!;

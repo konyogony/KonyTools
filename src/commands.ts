@@ -5,11 +5,11 @@ import config from './utils/config';
 
 dotenv.config();
 
-const rest = new REST({ version: '10' }).setToken(config.token);
+const rest = new REST().setToken(config.token);
 
 try {
-    await rest.put(Routes.applicationCommands(config.client_id), { body: loadCommands() });
-    console.log('Successfully registered application commands.');
+    const data = await rest.put(Routes.applicationCommands(config.client_id), { body: loadCommands() });
+    console.log(data);
 } catch (error) {
     console.error('Failed to register application commands:', error);
 }

@@ -41,6 +41,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 value: `[<t:${user_data.response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             },
         );
+
     if (match_data.items[0].status !== 'finished')
         embed.addFields({
             name: 'In game now',
@@ -48,5 +49,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 match_data.items[0].started_at / 1000,
             )}:f>, current in [Room](https://www.faceit.com/en/cs2/room/${match_data.items[0].match_id})`,
         });
-    return embed;
+
+    return interaction.reply({ embeds: [embed] });
 };
