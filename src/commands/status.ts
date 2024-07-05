@@ -39,14 +39,15 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 name: 'Joined Steam',
                 value: `[<t:${user_data.response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             },
-        );
-
-    if (match_data.items[0].status !== 'finished')
-        embed.addFields({
-            name: 'In game now',
-            value: `Started <t:${Math.floor(
-                match_data.items[0].started_at / 1000,
-            )}:f>, currently in [this](https://www.faceit.com/en/cs2/room/${match_data.items[0].match_id}) room`,
+        )
+        .addFields({
+            name: 'Status',
+            value:
+                match_data.items[0].status !== 'finished'
+                    ? `In a game, started <t:${Math.floor(
+                          match_data.items[0].started_at / 1000,
+                      )}:f>, currently in [this](https://www.faceit.com/en/cs2/room/${match_data.items[0].match_id}) room`
+                    : 'Not in a game',
         });
 
     return interaction.reply({ embeds: [embed] });

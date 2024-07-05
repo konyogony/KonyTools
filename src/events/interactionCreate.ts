@@ -15,7 +15,7 @@ export async function run(interaction: Interaction<'cached'>) {
                 await interaction.editReply('error');
             }
         } catch {
-            await interaction.channel!.send('error').catch(() => null);
+            await interaction.channel!.send('error').catch((e) => console.error(e));
         }
     }
 }
