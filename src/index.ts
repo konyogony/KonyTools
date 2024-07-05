@@ -1,4 +1,4 @@
-import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
+import { ActivityType, Client } from 'discord.js';
 import { getEloStats, getFaceitData } from './utils/util';
 import * as dotenv from 'dotenv';
 import { readdirSync } from 'node:fs';
