@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { EmbedBuilder, type ColorResolvable } from 'discord.js';
+import { type ColorResolvable } from 'discord.js';
+// import fs from 'fs';
+// import path from 'path';
 
 const faceitApi = axios.create({
     baseURL: 'https://open.faceit.com/data/v4',
@@ -8,7 +10,7 @@ const faceitApi = axios.create({
     },
 });
 
-const getEloStats = (elo: number): { level: number; color: ColorResolvable } => {
+export const getEloStats = (elo: number): { level: number; color: ColorResolvable } => {
     if (elo < 501) {
         return { level: 1, color: '#efeff1' };
     } else if (elo < 751) {
@@ -40,7 +42,7 @@ export const getFaceitData = async (playerID: string) => {
         })
         .catch((error) => console.log(error));
     const match_data = await faceitApi
-        .get(`/players/${playerID}/history`)
+        .get(`/players/${faceit_data.player_id}/history`)
         .then((response) => {
             return response.data;
         })
@@ -64,46 +66,20 @@ export const getSteamData = async (steamID: string) => {
     return [game_data, user_data];
 };
 
-export const createEmbed = async (playerID: string) => {
-    const [faceit_data, match_data] = await getFaceitData(playerID);
-    const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
-    console.log(game_data, user_data, faceit_data, match_data);
-    return new EmbedBuilder()
-        .setColor(getEloStats(faceit_data.games.cs2.faceit_elo).color)
-        .setTitle(faceit_data.steam_nickname)
-        .setThumbnail(faceit_data.avatar)
-        .addFields(
-            {
-                name: 'Faceit Elo',
-                value: `${faceit_data.games.cs2.faceit_elo} (LVL ${
-                    getEloStats(faceit_data.games.cs2.faceit_elo).level
-                })`,
-                inline: true,
-            },
-            {
-                name: 'Hours',
-                value: `${Math.floor(
-                    game_data.playerstats.stats.find(
-                        (stat: { name: string; value: number }) => stat.name === 'total_time_played'
-                    ).value / 3600
-                )}h`,
-                inline: true,
-            }
-        )
-        .addFields(
-            {
-                name: `Joined Faceit`,
-                value: `[<t:${Math.floor(
-                    Date.parse(faceit_data.activated_at) / 1000
-                )}:f>](https://www.faceit.com/en/players/${faceit_data.nickname})`,
-            },
-            {
-                name: 'Joined Steam',
-                value: `[<t:${user_data.response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
-            }
-        );
-    // .addFields({
-    //     name: 'In game now',
-    //     value: faceit_data.steam_id_64,
-    // });
-};
+// Ignore
+
+// const [faceit_data, match_data] = await getFaceitData('KonyOgony');
+// const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
+
+// const dataToWrite = JSON.stringify(
+//     {
+//         faceit_data: faceit_data,
+//         match_data: match_data,
+//     },
+//     null,
+//     2
+// );
+// const filePath = path.resolve(__dirname, '../test/data.json');
+
+// fs.writeFileSync(filePath, dataToWrite, 'utf8');
+// console.log('Data written to file successfully.');
