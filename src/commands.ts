@@ -8,8 +8,8 @@ dotenv.config();
 const rest = new REST().setToken(config.token);
 
 try {
-    const data = await rest.put(Routes.applicationCommands(config.client_id), { body: loadCommands() });
-    console.log(data);
+    await rest.put(Routes.applicationCommands(config.client_id), { body: loadCommands() });
+    console.log('Successfully registered application commands.');
 } catch (error) {
     console.error('Failed to register application commands:', error);
 }
