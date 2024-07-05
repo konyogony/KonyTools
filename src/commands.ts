@@ -3,21 +3,17 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
-    throw new Error('.env fucked up');
-}
-
 const commands = [
     {
-        name: 'check-kony',
+        name: 'get-data',
         description: "check kony's stats",
     },
-];
+] as const;
 
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN || '');
 
 try {
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID || ''), {
         body: commands,
     });
     console.log('Successfully registered application commands.');
