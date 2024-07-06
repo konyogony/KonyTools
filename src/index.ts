@@ -52,7 +52,9 @@ const updateStatuses = async () => {
     if (match.items[0].status !== 'finished') {
         if (!statusInterval) {
             statusInterval = setInterval(() => {
-                client.user?.setActivity(statuses[statusIndex]);
+                if (!client.user) return;
+
+                client.user.setActivity(statuses[statusIndex]);
                 statusIndex = (statusIndex + 1) % statuses.length;
             }, 4000);
         }
@@ -61,7 +63,7 @@ const updateStatuses = async () => {
             clearInterval(statusInterval);
             statusInterval = null;
         }
-        client.user?.setActivity(statuses[0]);
+        client.user.setActivity(statuses[0]);
     }
 };
 
