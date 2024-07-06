@@ -1,7 +1,10 @@
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
-export const options = new SlashCommandBuilder().setName('status').setDescription("Get kony's stats").toJSON();
+export const options = {
+    ...new SlashCommandBuilder().setName('status').setDescription("Get kony's stats").toJSON(),
+    ...{ integration_types: [1], contexts: [0, 1, 2] },
+};
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const [faceit_data, match_data] = await getFaceitData('KonyOgony');
