@@ -8,14 +8,6 @@ export async function run(interaction: Interaction<'cached'>) {
     try {
         await commandFile.run(interaction);
     } catch (e) {
-        try {
-            if (!interaction.replied) {
-                await interaction.reply({ content: 'error', ephemeral: true });
-            } else {
-                await interaction.editReply('error');
-            }
-        } catch {
-            await interaction.channel!.send('error').catch((e) => console.error(e));
-        }
+        console.log(e);
     }
 }
