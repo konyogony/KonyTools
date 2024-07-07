@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { type ColorResolvable } from 'discord.js';
 import config from './config';
-// import fs from 'fs';
-// import path from 'path';
 
 const faceitApi = axios.create({
     baseURL: 'https://open.faceit.com/data/v4',
@@ -85,21 +83,3 @@ export const timeSince = (timestamp: number): string => {
         return `${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`;
     }
 };
-
-// Ignore
-
-// const [faceit_data, match_data] = await getFaceitData('KonyOgony');
-// const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
-
-// const dataToWrite = JSON.stringify(
-//     {
-//         faceit_data: faceit_data,
-//         match_data: match_data,
-//     },
-//     null,
-//     2
-// );
-// const filePath = path.resolve(__dirname, '../test/data.json');
-
-// fs.writeFileSync(filePath, dataToWrite, 'utf8');
-// console.log('Data written to file successfully.');
