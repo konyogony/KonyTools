@@ -1,14 +1,28 @@
+import type { Imatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 export const options = {
-    ...new SlashCommandBuilder().setName('status').setDescription("Get kony's stats").toJSON(),
+    ...new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON(),
     ...{ integration_types: [1], contexts: [0, 1, 2] },
 };
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
-    const [faceit_data, match_data] = await getFaceitData('KonyOgony');
+    const [faceit_data, match_data] = await getFaceitData('kony_ogony');
     const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
+
+    const isWinner = (match: Imatch) => {
+        let kony_faction: 'faction1' | 'faction2';
+        if (match.teams.faction1.players.find((u) => u.nickname === 'kony_ogony')) {
+            kony_faction = 'faction1';
+        } else {
+            kony_faction = 'faction2';
+        }
+        if (match.results.winner === kony_faction) {
+            return true;
+        }
+    };
+
     const embed = new EmbedBuilder()
         .setColor(getEloStats(faceit_data.games.cs2.faceit_elo).color)
         .setTitle(faceit_data.steam_nickname)
@@ -27,7 +41,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     game_data.playerstats.stats.find(
                         (stat: { name: string; value: number }) => stat.name === 'total_time_played',
                     ).value / 3600,
-                )}h`,
+                )}h (not up to date)`,
                 inline: true,
             },
         )
@@ -44,13 +58,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             },
         )
         .addFields({
-            name: 'Status',
-            value:
-                match_data.items[0].status !== 'finished'
-                    ? `In a game, started <t:${Math.floor(
-                          match_data.items[0].started_at / 1000,
-                      )}:f>, currently in [this](https://www.faceit.com/en/cs2/room/${match_data.items[0].match_id}) room`
-                    : 'Not in a game',
+            name: `Last game: ${isWinner(match_data.items[0]) ? 'WIN' : 'LOSS'}`,
+            value: `kony_ogony has ${isWinner(match_data.items[0]) ? 'won' : 'lost'} the last match`,
         });
 
     return interaction.reply({ embeds: [embed] });
