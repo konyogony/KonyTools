@@ -1,3 +1,9 @@
+export interface IReminder {
+    content: string;
+    time: Date;
+    timezone: string;
+}
+
 export interface Imatch {
     match_id: string;
     game_id: string;

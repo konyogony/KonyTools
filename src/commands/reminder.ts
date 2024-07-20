@@ -1,19 +1,13 @@
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import fs from 'fs';
+import path from 'path';
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
-interface IReminder {
-    content: string;
-    time: Date;
-}
-
-const reminders: IReminder[] = [];
-
-const timezones = ['Thailand', 'Chelyabinsk', 'Moscow', 'Spain'];
+const timezones = [
+    { name: 'Thailand', value: 7 },
+    { name: 'Chelyabinsk', value: 5 },
+    { name: 'Moscow', value: 3 },
+    { name: 'Spain', value: 2 },
+];
 
 export const options = {
     ...new SlashCommandBuilder()
@@ -23,7 +17,7 @@ export const options = {
             option.setName('reminder').setDescription('Content of the reminder').setRequired(true),
         )
         .addStringOption((option) =>
-            option.setName('time').setDescription('Time for the reminder (e.g., 18 July 00:00)').setRequired(true),
+            option.setName('time').setDescription('Time for the reminder (e.g., 20 July 22:38)').setRequired(true),
         )
         .addStringOption((option) =>
             option
@@ -32,8 +26,8 @@ export const options = {
                 .setRequired(true)
                 .addChoices(
                     timezones.map((timezone) => ({
-                        name: timezone,
-                        value: timezone,
+                        name: timezone.name,
+                        value: timezone.name,
                     })),
                 ),
         )
@@ -47,53 +41,66 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const reminderTimeStr = interaction.options.getString('time', true);
     const selectedTimezone = interaction.options.getString('timezone', true);
 
-    let timezoneIdentifier: string | undefined;
-
-    switch (selectedTimezone) {
-        case 'Thailand':
-            timezoneIdentifier = 'Asia/Bangkok';
-            break;
-        case 'Chelyabinsk':
-            timezoneIdentifier = 'Asia/Yekaterinburg';
-            break;
-        case 'Moscow':
-            timezoneIdentifier = 'Europe/Moscow';
-            break;
-        case 'Spain':
-            timezoneIdentifier = 'Europe/Madrid';
-            break;
-        default:
-            await interaction.reply('Invalid timezone selected.');
-            return;
+    const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;
+    if (!timeFormatRegex.test(reminderTimeStr)) {
+        return interaction.reply('Invalid time format. Please use the format "DD MMM HH:mm" (e.g., "20 July 22:38").');
     }
+    const utcNow = new Date().getTime();
 
-    const reminderTime = dayjs.tz(reminderTimeStr, 'DD MMMM HH:mm');
+    const [day, monthName, time] = reminderTimeStr.split(' ');
+    const [hours, minutes] = time.split(':');
 
-    if (!reminderTime.isValid()) {
-        return interaction.reply('Invalid time format. Please use a valid date and time format.');
-    }
+    const monthMap: { [key: string]: number } = {
+        January: 0,
+        February: 1,
+        March: 2,
+        April: 3,
+        May: 4,
+        June: 5,
+        July: 6,
+        August: 7,
+        September: 8,
+        October: 9,
+        November: 10,
+        December: 11,
+    };
 
-    const currentTime = dayjs().tz(timezoneIdentifier);
-    console.log('Current Time:', currentTime.format('YYYY-MM-DD HH:mm:ss'));
-    console.log('Reminder Time:', reminderTime.format('YYYY-MM-DD HH:mm:ss'));
+    const month = monthMap[monthName];
 
-    if (reminderTime.isBefore(currentTime)) {
-        await interaction.reply('Reminder time cannot be in the past. Please provide a future time.');
-        return;
-    }
+    const timezone = timezones.find((tz) => tz.name === selectedTimezone);
+    const offset = timezone ? timezone.value : 0;
 
-    reminders.push({ content: reminderContent, time: reminderTime.toDate() });
-    await interaction.reply(
-        `Reminder \`${reminderContent}\` is set for <t:${reminderTime.unix()}:f> in ${selectedTimezone}`,
+    const localDate = new Date(
+        Date.UTC(2024, month, parseInt(day, 10), parseInt(hours, 10) - offset, parseInt(minutes, 10)),
     );
 
-    const delay = reminderTime.diff(currentTime, 'millisecond');
+    const utcReminder = localDate.getTime();
+
+    const delay = utcReminder - utcNow;
+
+    const thailandTimeOffset = 7;
+    const thailandTime = new Date(utcNow + thailandTimeOffset * 60 * 60 * 1000).toLocaleString('en-US', {
+        timeZone: 'Asia/Bangkok',
+    });
+
+    const logEntry = `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Thailand Time: ${thailandTime}\n`;
+
+    try {
+        const logFilePath = path.join(__dirname, '../command_log.txt');
+        fs.appendFileSync(logFilePath, logEntry, 'utf8');
+    } catch (e) {
+        console.error(e);
+    }
+
+    if (delay < 0) {
+        return interaction.reply('The reminder time is in the past. Please set a future time.');
+    }
 
     setTimeout(() => {
         interaction.followUp(`<@${interaction.user.id}>, your reminder \`${reminderContent}\``);
-        const index = reminders.findIndex((r) => r.content === reminderContent);
-        if (index !== -1) {
-            reminders.splice(index, 1);
-        }
     }, delay);
+
+    return interaction.reply(
+        `Reminder set for \`${reminderContent}\` at \`${reminderTimeStr}\` ${selectedTimezone} time.`,
+    );
 };

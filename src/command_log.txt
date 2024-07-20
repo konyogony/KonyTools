@@ -1,0 +1,4 @@
+Username: kony_ogony, Reminder: aa, Time: 20 July 23:24, Timezone: Thailand, Thailand Time: 7/21/2024, 6:22:44 AM
+Username: kony_ogony, Action: Reminder, Reminder: чикенмакнагетс, Time: 20 July 23:26, Timezone: Thailand, Thailand Time: 7/21/2024, 6:24:05 AM
+Username: kony_ogony, Action: Reminder, Reminder: чикенбургер, Time: 20 July 21:30, Timezone: Chelyabinsk, Thailand Time: 7/21/2024, 6:24:25 AM
+Username: kony_ogony, Action: Reminder, Reminder: рестарт, Time: 21 July 00:00, Timezone: Moscow, Thailand Time: 7/21/2024, 6:26:36 AM
