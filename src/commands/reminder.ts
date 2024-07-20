@@ -86,7 +86,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const logEntry = `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Thailand Time: ${thailandTime}\n`;
 
     try {
-        const logFilePath = path.join(__dirname, '../command_log.txt');
+        const logFilePath = path.join(__dirname, '../command_log.log');
         fs.appendFileSync(logFilePath, logEntry, 'utf8');
     } catch (e) {
         console.error(e);
