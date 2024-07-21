@@ -15,7 +15,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const logFilePath = path.join(__dirname, '../command_log.log');
         fs.appendFileSync(
             logFilePath,
-            `Username: ${interaction.user.username}, Action: List,Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
+            `Username: ${interaction.user.username}, Action: List, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
             'utf8',
         );
     } catch (e) {
@@ -33,7 +33,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'Author', value: `The author of this reminder is <@${reminder.interaction_user_id}>` },
                 {
                     name: 'Time',
-                    value: `${dayjs(reminder.time).format('dddd, DD MMMM YYYY, HH:mm')} ${reminder.timezone}`,
+                    value: `<t:${reminder.time}:f> ${reminder.timezone}`,
                 },
                 { name: 'Mention User', value: `User that is going to be mentioned is <@${reminder.user_mention_id}>` },
             ])
