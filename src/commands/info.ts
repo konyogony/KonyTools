@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import type { Imatch } from '../types';
+import type { IMatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import dayjs from 'dayjs';
@@ -14,7 +14,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const [faceit_data, match_data] = await getFaceitData('kony_ogony');
     const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
 
-    const isWinner = (match: Imatch) => {
+    const isWinner = (match: IMatch) => {
         let kony_faction: 'faction1' | 'faction2';
         if (match.teams.faction1.players.find((u) => u.nickname === 'kony_ogony')) {
             kony_faction = 'faction1';
@@ -80,5 +80,5 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             value: `kony_ogony has ${isWinner(match_data.items[0]) ? 'won' : 'lost'} the last match`,
         });
 
-    return interaction.reply({ embeds: [embed] });
+    return await interaction.reply({ embeds: [embed] });
 };

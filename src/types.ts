@@ -1,10 +1,13 @@
 export interface IReminder {
+    interaction_user_id: string;
+    interaction_user_img: string;
     content: string;
-    time: Date;
+    time: number;
     timezone: string;
+    user_mention_id: string;
 }
 
-export interface Imatch {
+export interface IMatch {
     match_id: string;
     game_id: string;
     region: string;

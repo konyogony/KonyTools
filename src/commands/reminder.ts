@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
+import { reminderList } from '../reminderList';
 
 const timezones = [
     { name: 'Thailand', value: 7 },
@@ -57,8 +58,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;
     if (!timeFormatRegex.test(reminderTimeStr)) {
-        return interaction.reply('Invalid time format. Please use the format "DD MMM HH:mm" (e.g., "20 July 22:38").');
+        return await interaction.reply(
+            'Invalid time format. Please use the format "DD MMM HH:mm" (e.g., "20 July 22:38").',
+        );
     }
+
     const utcNow = new Date().getTime();
 
     const [day, monthName, time] = reminderTimeStr.split(' ');
@@ -93,14 +97,30 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const delay = utcReminder - utcNow;
 
     if (delay < 0) {
-        return interaction.reply('The reminder time is in the past. Please set a future time.');
+        return await interaction.reply('The reminder time is in the past. Please set a future time.');
     }
 
-    setTimeout(() => {
-        interaction.followUp(`<@${targetUser!.id}>, your reminder \`${reminderContent}\``);
+    const reminderToPush = {
+        interaction_user_id: interaction.user.id,
+        interaction_user_img: interaction.user.displayAvatarURL(),
+        content: reminderContent,
+        time: utcReminder,
+        timezone: selectedTimezone,
+        user_mention_id: targetUser!.id,
+    };
+
+    reminderList.push(reminderToPush);
+
+    setTimeout(async () => {
+        await interaction.followUp(`<@${targetUser!.id}>, your reminder \`${reminderContent}\``);
+        const reminderIndex = reminderList.findIndex((reminderFound) => reminderToPush === reminderFound);
+        if (reminderIndex !== -1) {
+            reminderList.splice(reminderIndex, 1);
+        }
     }, delay);
 
-    return interaction.reply(
-        `Reminder \`${reminderContent}\` set for <@${targetUser!.id}> at \`${reminderTimeStr}\` ${selectedTimezone} time.`,
-    );
+    return await interaction.reply({
+        content: `Reminder \`${reminderContent}\` set for <@${targetUser!.id}> at \`${reminderTimeStr}\` ${selectedTimezone} time.`,
+        allowedMentions: { parse: [] },
+    });
 };

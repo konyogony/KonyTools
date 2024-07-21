@@ -42,7 +42,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     }
 
     if (interaction.user.id !== '564472732071493633')
-        return interaction.reply('Sorry! You dont have permission to perform this action');
+        return await interaction.reply('Sorry! You dont have permission to perform this action');
 
     const minutes = parseInt(time);
 
@@ -75,5 +75,5 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         });
     }, 5000);
 
-    return interaction.reply(`Shutdown is set for <t:${shutdownTime}:f>`);
+    return await interaction.reply(`Shutdown is set for <t:${shutdownTime}:f>`);
 };
