@@ -43,7 +43,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
-            { name: 'Reminder Content', value: `<@${reminderContent}>` },
+            { name: 'Reminder Content', value: `${reminderContent}` },
             { name: 'Reminder Time', value: `${reminderTimeStr}` },
             { name: 'Reminder Timezone', value: `${selectedTimezone}` },
             { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
@@ -101,13 +101,26 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     reminderList.push(reminderToPush);
 
     setTimeout(async () => {
-        await interaction.followUp(`<@${targetUser!.id}>, your reminder \`${reminderContent}\``);
+        const embed = new EmbedBuilder()
+            .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
+            .setDescription(
+                `<@${targetUser!.id}>, the time is <t:${Math.floor(utcReminder / 1000)}:f>. \n \`\`\`${reminderContent}\`\`\``,
+            );
+        await interaction.followUp({ embeds: [embed] });
         const reminderIndex = reminderList.findIndex((reminderFound) => reminderToPush === reminderFound);
         if (reminderIndex !== -1) reminderList.splice(reminderIndex, 1);
     }, delay);
 
+    const embed = new EmbedBuilder()
+        .setTitle('Reminder created')
+        .addFields(
+            { name: 'Content', value: `${reminderContent}` },
+            { name: 'Time', value: `<t:${Math.floor(utcReminder / 1000)}:f>` },
+            { name: 'User to ping', value: `<@${targetUser!.id}>` },
+        );
+
     return await interaction.reply({
-        content: `Reminder \`${reminderContent}\` set for <@${targetUser!.id}> at \`${reminderTimeStr}\` ${selectedTimezone} time.`,
+        embeds: [embed],
         allowedMentions: { parse: [] },
     });
 };
