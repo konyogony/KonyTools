@@ -1,72 +1,47 @@
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { exec } from 'child_process';
-import { client } from '..';
 import config from '../utils/config';
 
-export const options = {
-    ...new SlashCommandBuilder()
-        .setName('shutdown')
-        .setDescription('Set a timer to shutdown')
-        .addStringOption((option) =>
-            option.setName('time').setDescription('In how many minutes would it shut down').setRequired(true),
-        )
-        .addStringOption((option) =>
-            option
-                .setName('platform')
-                .setDescription('Windows or Linux')
-                .setRequired(true)
-                .addChoices([
-                    { name: 'Windows', value: 'windows' },
-                    { name: 'Linux', value: 'linux' },
-                ]),
-        )
-        .toJSON(),
-    ...{ integration_types: [1], contexts: [0, 1, 2] },
-};
+export const options = new SlashCommandBuilder()
+    .setName('shutdown')
+    .setDescription('Set a timer to shutdown')
+    .addNumberOption((option) =>
+        option.setName('time').setDescription('In how many minutes would it shut down').setRequired(true),
+    )
+    .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
-    const time = interaction.options.getString('time', true);
-    const platform = interaction.options.getString('platform', true);
+    const time = interaction.options.getNumber('time', true);
 
-    const owner = await client.users.fetch(config.kony_id);
-    const EmbedLog = new EmbedBuilder().setTitle('Action: Shutdown').setFields([
+    const embed_log = new EmbedBuilder().setTitle('Action: Shutdown').setFields([
         { name: 'User', value: `<@${interaction.user.id}>` },
         { name: 'Minutes', value: `<@${time}>` },
-        { name: 'Platform', value: `<@${platform}>` },
         { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
     ]);
-    if (owner) {
-        await owner.send({ embeds: [EmbedLog] });
-    }
+    const owner = await interaction.client.users.fetch(config.kony_id);
+    if (owner) await owner.send({ embeds: [embed_log] });
 
     if (interaction.user.id !== config.kony_id)
         return await interaction.reply('Sorry! You dont have permission to perform this action');
 
-    const minutes = parseInt(time);
-
-    if (platform === 'linux') {
-        exec(`shutdown -P ${minutes}`);
-    } else if (platform === 'windows') {
-        exec(`shutdown /s /t ${minutes * 60}`);
-    }
-
-    const shutdownTime = Date.now() + minutes * 60000;
+    exec(`shutdown -P ${time}`);
+    const shutdownTime = Date.now() + time * 60000;
 
     setInterval(() => {
-        if (!client.user) return;
+        if (!interaction.client.user) return;
+
         const now = Date.now();
         const timeLeft = shutdownTime - now;
-        if (timeLeft <= 0) {
-            client.user.setActivity({
+        if (timeLeft <= 0)
+            return interaction.client.user.setActivity({
                 name: 'Shutting down now',
                 type: ActivityType.Custom,
                 state: '',
             });
-            return;
-        }
+
         const minutesLeft = Math.floor(timeLeft / 60000);
         const secondsLeft = Math.floor((timeLeft % 60000) / 1000);
-        client.user.setActivity({
+        interaction.client.user.setActivity({
             name: `Shutting down in ${minutesLeft}m ${secondsLeft}s`,
             type: ActivityType.Custom,
             state: '',

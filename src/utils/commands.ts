@@ -8,7 +8,7 @@ export const loadCommands = () => {
 
     for (let filename of files) {
         let file = require(`../commands/${filename}`);
-        file.options ? commands.push(file.options) : null;
+        file.options ? commands.push({ ...file.options, integration_types: [1], contexts: [0, 1, 2] }) : null;
     }
 
     return commands;

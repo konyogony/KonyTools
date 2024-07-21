@@ -7,6 +7,22 @@ export interface IReminder {
     user_mention_id: string;
 }
 
+interface Faction {
+    team_id: string;
+    nickname: string;
+    avatar: string;
+    type: string;
+    players: {
+        player_id: string;
+        nickname: string;
+        avatar: string;
+        skill_level: number;
+        game_player_id: string;
+        game_player_name: string;
+        faceit_url: string;
+    }[];
+}
+
 export interface IMatch {
     match_id: string;
     game_id: string;
@@ -16,114 +32,10 @@ export interface IMatch {
     max_players: number;
     teams_size: number;
     teams: {
-        faction1: {
-            team_id: string;
-            nickname: string;
-            avatar: string;
-            type: string;
-            players: [
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-            ];
-        };
-        faction2: {
-            team_id: string;
-            nickname: string;
-            avatar: string;
-            type: string;
-            players: [
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-                {
-                    player_id: string;
-                    nickname: string;
-                    avatar: string;
-                    skill_level: number;
-                    game_player_id: string;
-                    game_player_name: string;
-                    faceit_url: string;
-                },
-            ];
-        };
+        faction1: Faction;
+        faction2: Faction;
     };
-    playing_players: [string, string, string, string, string, string, string, string, string, string];
+    playing_players: string[];
     competition_id: string;
     competition_name: string;
     competition_type: string;

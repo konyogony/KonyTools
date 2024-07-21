@@ -7,13 +7,7 @@ import config from './utils/config';
 dotenv.config();
 
 export const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.DirectMessages,
-        GatewayIntentBits.DirectMessageReactions,
-    ],
+    intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
 });
 
 client.once('ready', async () => {
@@ -27,16 +21,7 @@ client.once('ready', async () => {
     });
 });
 
-client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isChatInputCommand()) return;
-    const owner = await client.users.fetch(config.kony_id);
-    if (owner) {
-        await owner.send(`Command ${interaction.commandName} used by ${user.tag} in ${interaction.guild.name}`);
-    }
-});
-
 const eventFiles = readdirSync(`${__dirname}/events/`).filter((x) => x.endsWith('.ts'));
-console.log(eventFiles);
 for (const filename of eventFiles) {
     const file = require(`./events/${filename}`);
     const name = filename.split('.')[0]!;

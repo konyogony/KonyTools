@@ -2,80 +2,63 @@ import type { IMatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
-import { client } from '..';
 
-export const options = {
-    ...new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON(),
-    ...{ integration_types: [1], contexts: [0, 1, 2] },
+export const options = new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON();
+
+const isWinner = (match: IMatch): boolean => {
+    const faction = match.teams.faction1.players.find((u) => u.nickname === 'kony_ogony') ? 'faction1' : 'faction2';
+
+    return faction === match.results.winner;
 };
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const [faceit_data, match_data] = await getFaceitData('kony_ogony');
-    const [game_data, user_data] = await getSteamData(faceit_data.steam_id_64);
+    const [{ playerstats: stats }, { response: players }] = await getSteamData(faceit_data.steam_id_64);
 
-    const isWinner = (match: IMatch) => {
-        let kony_faction: 'faction1' | 'faction2';
-        if (match.teams.faction1.players.find((u) => u.nickname === 'kony_ogony')) {
-            kony_faction = 'faction1';
-        } else {
-            kony_faction = 'faction2';
-        }
-        if (match.results.winner === kony_faction) {
-            return true;
-        }
-    };
+    const activated_at = Math.floor(Date.parse(faceit_data.activated_at) / 1000);
+    const winner = isWinner(match_data.items[0]);
+    const hours = Math.floor(
+        stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played').value / 3600,
+    );
 
-    const owner = await client.users.fetch(config.kony_id);
-    const EmbedLog = new EmbedBuilder().setTitle('List').setFields([
+    const embed_log = new EmbedBuilder().setTitle('Action: Info').setFields([
         { name: 'User', value: `<@${interaction.user.id}>` },
         { name: 'ELO', value: `${faceit_data.games.cs2.faceit_elo}` },
-        {
-            name: 'Hours',
-            value: `${Math.floor(game_data.playerstats.stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played').value / 3600)}`,
-        },
+        { name: 'Hours', value: `${hours}` },
         { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
     ]);
-    if (owner) {
-        await owner.send({ embeds: [EmbedLog] });
-    }
+    const owner = await interaction.client.users.fetch(config.kony_id);
+    if (owner) await owner.send({ embeds: [embed_log] });
 
     const embed = new EmbedBuilder()
-        .setColor(getEloStats(faceit_data.games.cs2.faceit_elo).color)
+        .setColor(getEloStats(faceit_data.elo).color)
         .setTitle(faceit_data.steam_nickname)
         .setThumbnail(faceit_data.avatar)
         .addFields(
             {
                 name: 'Faceit Elo',
-                value: `${faceit_data.games.cs2.faceit_elo} (LVL ${
-                    getEloStats(faceit_data.games.cs2.faceit_elo).level
-                })`,
+                value: `${faceit_data.elo} (LVL ${getEloStats(faceit_data.elo).level})`,
                 inline: true,
             },
             {
                 name: 'Hours',
-                value: `${Math.floor(
-                    game_data.playerstats.stats.find(
-                        (stat: { name: string; value: number }) => stat.name === 'total_time_played',
-                    ).value / 3600,
-                )}h (not up to date)`,
+                value: `${hours}h (not up to date)`,
                 inline: true,
             },
         )
         .addFields(
             {
                 name: `Joined Faceit`,
-                value: `[<t:${Math.floor(
-                    Date.parse(faceit_data.activated_at) / 1000,
-                )}:f>](https://www.faceit.com/en/players/${faceit_data.nickname})`,
+                value: `[<t:${activated_at}:f>](https://faceit.com/en/players/${faceit_data.nickname})`,
             },
             {
                 name: 'Joined Steam',
-                value: `[<t:${user_data.response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
+                value: `[<t:${players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             },
         )
         .addFields({
-            name: `Last game: ${isWinner(match_data.items[0]) ? 'WIN' : 'LOSS'}`,
-            value: `kony_ogony has ${isWinner(match_data.items[0]) ? 'won' : 'lost'} the last match`,
+            name: `Last game: ${winner ? 'WIN' : 'LOSS'}`,
+            value: `kony_ogony has ${winner ? 'won' : 'lost'} the last match`,
         });
 
     return await interaction.reply({ embeds: [embed] });

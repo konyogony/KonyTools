@@ -10,26 +10,27 @@ const faceitApi = axios.create({
 });
 
 export const getEloStats = (elo: number): { level: number; color: ColorResolvable } => {
-    if (elo < 501) {
-        return { level: 1, color: '#efeff1' };
-    } else if (elo < 751) {
-        return { level: 2, color: '#3de64e' };
-    } else if (elo < 901) {
-        return { level: 3, color: '#3de64e' };
-    } else if (elo < 1051) {
-        return { level: 4, color: '#fec740' };
-    } else if (elo < 1201) {
-        return { level: 5, color: '#fec740' };
-    } else if (elo < 1351) {
-        return { level: 6, color: '#fec740' };
-    } else if (elo < 1531) {
-        return { level: 7, color: '#fec740' };
-    } else if (elo < 1751) {
-        return { level: 8, color: '#ff6118' };
-    } else if (elo < 2001) {
-        return { level: 9, color: '#ff6118' };
-    } else {
-        return { level: 10, color: '#ee2000' };
+    switch (true) {
+        case elo < 501:
+            return { level: 1, color: '#efeff1' };
+        case elo < 751:
+            return { level: 2, color: '#3de64e' };
+        case elo < 901:
+            return { level: 3, color: '#3de64e' };
+        case elo < 1051:
+            return { level: 4, color: '#fec740' };
+        case elo < 1201:
+            return { level: 5, color: '#fec740' };
+        case elo < 1351:
+            return { level: 6, color: '#fec740' };
+        case elo < 1531:
+            return { level: 7, color: '#fec740' };
+        case elo < 1751:
+            return { level: 8, color: '#ff6118' };
+        case elo < 2001:
+            return { level: 9, color: '#ff6118' };
+        default:
+            return { level: 10, color: '#ee2000' };
     }
 };
 
@@ -77,9 +78,8 @@ export const timeSince = (timestamp: number): string => {
     const displaySeconds = seconds % 60;
     const displayMinutes = minutes % 60;
 
-    if (hours > 0) {
+    if (hours > 0)
         return `${hours}:${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
-    } else {
-        return `${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`;
-    }
+
+    return `${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`;
 };
