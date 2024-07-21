@@ -38,13 +38,16 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const targetUser = interaction.options.getUser('user');
 
     const owner = await interaction.client.users.fetch(config.kony_id);
-    const embed_log = new EmbedBuilder().setTitle('Action: Reminder').setFields([
-        { name: 'User', value: `<@${interaction.user.id}>` },
-        { name: 'Reminder Content', value: `<@${reminderContent}>` },
-        { name: 'Reminder Time', value: `${reminderTimeStr}` },
-        { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
-    ]);
+    const embed_log = new EmbedBuilder()
+        .setTitle('Action: Reminder')
+        .setThumbnail(interaction.user.displayAvatarURL())
+        .setFields([
+            { name: 'User', value: `<@${interaction.user.id}>` },
+            { name: 'Reminder Content', value: `<@${reminderContent}>` },
+            { name: 'Reminder Time', value: `${reminderTimeStr}` },
+            { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+        ]);
     if (owner) await owner.send({ embeds: [embed_log] });
 
     const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;

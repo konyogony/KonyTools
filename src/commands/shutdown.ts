@@ -13,11 +13,14 @@ export const options = new SlashCommandBuilder()
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const time = interaction.options.getNumber('time', true);
 
-    const embed_log = new EmbedBuilder().setTitle('Action: Shutdown').setFields([
-        { name: 'User', value: `<@${interaction.user.id}>` },
-        { name: 'Minutes', value: `<@${time}>` },
-        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
-    ]);
+    const embed_log = new EmbedBuilder()
+        .setTitle('Action: Shutdown')
+        .setThumbnail(interaction.user.displayAvatarURL())
+        .setFields([
+            { name: 'User', value: `<@${interaction.user.id}>` },
+            { name: 'Minutes', value: `<@${time}>` },
+            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+        ]);
     const owner = await interaction.client.users.fetch(config.kony_id);
     if (owner) await owner.send({ embeds: [embed_log] });
 

@@ -5,11 +5,14 @@ import config from '../utils/config';
 export const options = new SlashCommandBuilder().setName('list').setDescription('List all active reminders').toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
-    const embed_log = new EmbedBuilder().setTitle('Action: List').setFields([
-        { name: 'User', value: `<@${interaction.user.id}>` },
-        { name: 'Reminders', value: `${reminderList.length}` },
-        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
-    ]);
+    const embed_log = new EmbedBuilder()
+        .setTitle('Action: List')
+        .setThumbnail(interaction.user.displayAvatarURL())
+        .setFields([
+            { name: 'User', value: `<@${interaction.user.id}>` },
+            { name: 'Reminders', value: `${reminderList.length}` },
+            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+        ]);
     const owner = await interaction.client.users.fetch(config.kony_id);
     if (owner) await owner.send({ embeds: [embed_log] });
 
