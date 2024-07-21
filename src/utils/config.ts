@@ -5,4 +5,5 @@ export default {
     client_id: process.env['CLIENT_ID']!,
     faceit_key: process.env['FACEIT_KEY']!,
     steam_key: process.env['STEAM_KEY']!,
+    kony_id: process.env['KONY_ID']!,
 };

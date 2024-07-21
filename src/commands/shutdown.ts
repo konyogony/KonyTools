@@ -1,9 +1,7 @@
-import path from 'path';
-import fs from 'fs';
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { exec } from 'child_process';
 import { client } from '..';
-import dayjs from 'dayjs';
+import config from '../utils/config';
 
 export const options = {
     ...new SlashCommandBuilder()
@@ -30,18 +28,18 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const time = interaction.options.getString('time', true);
     const platform = interaction.options.getString('platform', true);
 
-    try {
-        const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(
-            logFilePath,
-            `Username: ${interaction.user.username}, Action: Shutdown, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
-            'utf8',
-        );
-    } catch (e) {
-        console.error(e);
+    const owner = await client.users.fetch(config.kony_id);
+    const EmbedLog = new EmbedBuilder().setTitle('Action: Shutdown').setFields([
+        { name: 'User', value: `<@${interaction.user.id}>` },
+        { name: 'Minutes', value: `<@${time}>` },
+        { name: 'Platform', value: `<@${platform}>` },
+        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+    ]);
+    if (owner) {
+        await owner.send({ embeds: [EmbedLog] });
     }
 
-    if (interaction.user.id !== '564472732071493633')
+    if (interaction.user.id !== config.kony_id)
         return await interaction.reply('Sorry! You dont have permission to perform this action');
 
     const minutes = parseInt(time);

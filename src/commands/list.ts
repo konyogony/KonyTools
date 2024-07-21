@@ -1,8 +1,7 @@
-import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import fs from 'fs';
-import path from 'path';
 import { reminderList } from '../reminderList';
+import config from '../utils/config';
+import { client } from '..';
 
 export const options = {
     ...new SlashCommandBuilder().setName('list').setDescription('List all active reminders').toJSON(),
@@ -11,15 +10,14 @@ export const options = {
 };
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
-    try {
-        const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(
-            logFilePath,
-            `Username: ${interaction.user.username}, Action: List, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
-            'utf8',
-        );
-    } catch (e) {
-        console.error(e);
+    const owner = await client.users.fetch(config.kony_id);
+    const EmbedLog = new EmbedBuilder().setTitle('Action: List').setFields([
+        { name: 'User', value: `<@${interaction.user.id}>` },
+        { name: 'Reminders', value: `${reminderList.length}` },
+        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+    ]);
+    if (owner) {
+        await owner.send({ embeds: [EmbedLog] });
     }
 
     await interaction.reply(

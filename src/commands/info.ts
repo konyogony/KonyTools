@@ -1,9 +1,8 @@
-import path from 'path';
-import fs from 'fs';
 import type { IMatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import dayjs from 'dayjs';
+import config from '../utils/config';
+import { client } from '..';
 
 export const options = {
     ...new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON(),
@@ -26,19 +25,18 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         }
     };
 
-    try {
-        const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(
-            logFilePath,
-            `Username: ${interaction.user.username}, Action: Info, ELO: ${faceit_data.games.cs2.faceit_elo}, Hours: ${Math.floor(
-                game_data.playerstats.stats.find(
-                    (stat: { name: string; value: number }) => stat.name === 'total_time_played',
-                ).value / 3600,
-            )}, LastGame: ${isWinner(match_data.items[0]) ? 'WIN' : 'LOSS'}, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
-            'utf8',
-        );
-    } catch (e) {
-        console.error(e);
+    const owner = await client.users.fetch(config.kony_id);
+    const EmbedLog = new EmbedBuilder().setTitle('List').setFields([
+        { name: 'User', value: `<@${interaction.user.id}>` },
+        { name: 'ELO', value: `${faceit_data.games.cs2.faceit_elo}` },
+        {
+            name: 'Hours',
+            value: `${Math.floor(game_data.playerstats.stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played').value / 3600)}`,
+        },
+        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+    ]);
+    if (owner) {
+        await owner.send({ embeds: [EmbedLog] });
     }
 
     const embed = new EmbedBuilder()

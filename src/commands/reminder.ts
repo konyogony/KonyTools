@@ -1,8 +1,7 @@
-import dayjs from 'dayjs';
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import fs from 'fs';
-import path from 'path';
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { reminderList } from '../reminderList';
+import { client } from '..';
+import config from '../utils/config';
 
 const timezones = [
     { name: 'Thailand', value: 7 },
@@ -45,15 +44,16 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const selectedTimezone = interaction.options.getString('timezone', true);
     const targetUser = interaction.options.getUser('user');
 
-    try {
-        const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(
-            logFilePath,
-            `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Ping: ${targetUser!.username}, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
-            'utf8',
-        );
-    } catch (e) {
-        console.error(e);
+    const owner = await client.users.fetch(config.kony_id);
+    const EmbedLog = new EmbedBuilder().setTitle('Action: Reminder').setFields([
+        { name: 'User', value: `<@${interaction.user.id}>` },
+        { name: 'Reminder Content', value: `<@${reminderContent}>` },
+        { name: 'Reminder Time', value: `${reminderTimeStr}` },
+        { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+        { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+    ]);
+    if (owner) {
+        await owner.send({ embeds: [EmbedLog] });
     }
 
     const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;

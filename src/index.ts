@@ -27,6 +27,14 @@ client.once('ready', async () => {
     });
 });
 
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+    const owner = await client.users.fetch(config.kony_id);
+    if (owner) {
+        await owner.send(`Command ${interaction.commandName} used by ${user.tag} in ${interaction.guild.name}`);
+    }
+});
+
 const eventFiles = readdirSync(`${__dirname}/events/`).filter((x) => x.endsWith('.ts'));
 console.log(eventFiles);
 for (const filename of eventFiles) {
