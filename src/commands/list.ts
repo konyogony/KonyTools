@@ -27,7 +27,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'Author', value: `The author of this reminder is <@${reminder.interaction_user_id}>` },
                 {
                     name: 'Time',
-                    value: `<t:${reminder.time}:f> ${reminder.timezone}`,
+                    value: `<t:${Math.floor(reminder.time / 1000)}:f>`,
                 },
                 { name: 'Mention User', value: `User that is going to be mentioned is <@${reminder.user_mention_id}>` },
             ])
