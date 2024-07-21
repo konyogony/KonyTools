@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
@@ -39,9 +40,20 @@ export const options = {
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const reminderContent = interaction.options.getString('reminder', true);
-    const reminderTimeStr = interaction.options.getString('time', true);
+    const reminderTimeStr = interaction.options.getString('time', true).toLowerCase();
     const selectedTimezone = interaction.options.getString('timezone', true);
     const targetUser = interaction.options.getUser('user');
+
+    try {
+        const logFilePath = path.join(__dirname, '../command_log.log');
+        fs.appendFileSync(
+            logFilePath,
+            `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Ping: ${targetUser!.username}, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
+            'utf8',
+        );
+    } catch (e) {
+        console.error(e);
+    }
 
     const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;
     if (!timeFormatRegex.test(reminderTimeStr)) {
@@ -53,18 +65,18 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const [hours, minutes] = time.split(':');
 
     const monthMap: { [key: string]: number } = {
-        January: 0,
-        February: 1,
-        March: 2,
-        April: 3,
-        May: 4,
-        June: 5,
-        July: 6,
-        August: 7,
-        September: 8,
-        October: 9,
-        November: 10,
-        December: 11,
+        january: 0,
+        february: 1,
+        march: 2,
+        april: 3,
+        may: 4,
+        june: 5,
+        july: 6,
+        august: 7,
+        september: 8,
+        october: 9,
+        november: 10,
+        december: 11,
     };
 
     const month = monthMap[monthName];
@@ -79,19 +91,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const utcReminder = localDate.getTime();
 
     const delay = utcReminder - utcNow;
-
-    const thailandTime = new Date(utcNow + 7 * 60 * 60 * 1000).toLocaleString('en-US', {
-        timeZone: 'Asia/Bangkok',
-    });
-
-    const logEntry = `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Ping: ${targetUser!.username}, Thailand Time: ${thailandTime}\n`;
-
-    try {
-        const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(logFilePath, logEntry, 'utf8');
-    } catch (e) {
-        console.error(e);
-    }
 
     if (delay < 0) {
         return interaction.reply('The reminder time is in the past. Please set a future time.');

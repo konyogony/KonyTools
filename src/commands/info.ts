@@ -3,6 +3,7 @@ import fs from 'fs';
 import type { Imatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import dayjs from 'dayjs';
 
 export const options = {
     ...new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON(),
@@ -24,6 +25,21 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             return true;
         }
     };
+
+    try {
+        const logFilePath = path.join(__dirname, '../command_log.log');
+        fs.appendFileSync(
+            logFilePath,
+            `Username: ${interaction.user.username}, Action: Info, ELO: ${faceit_data.games.cs2.faceit_elo}, Hours: ${Math.floor(
+                game_data.playerstats.stats.find(
+                    (stat: { name: string; value: number }) => stat.name === 'total_time_played',
+                ).value / 3600,
+            )}, LastGame: ${isWinner(match_data.items[0]) ? 'WIN' : 'LOSS'}, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
+            'utf8',
+        );
+    } catch (e) {
+        console.error(e);
+    }
 
     const embed = new EmbedBuilder()
         .setColor(getEloStats(faceit_data.games.cs2.faceit_elo).color)
@@ -63,22 +79,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             name: `Last game: ${isWinner(match_data.items[0]) ? 'WIN' : 'LOSS'}`,
             value: `kony_ogony has ${isWinner(match_data.items[0]) ? 'won' : 'lost'} the last match`,
         });
-
-    const thailandTime = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toLocaleString('en-US', {
-        timeZone: 'Asia/Bangkok',
-    });
-
-    const logEntry = `Username: ${interaction.user.username}, Action: Info, ELO: ${faceit_data.games.cs2.faceit_elo}, Hours: ${Math.floor(
-        game_data.playerstats.stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played')
-            .value / 3600,
-    )}, LastGame: ${isWinner(match_data.items[0]) ? 'WIN' : 'LOSS'}, Thailand Time: ${thailandTime}\n`;
-
-    try {
-        const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(logFilePath, logEntry, 'utf8');
-    } catch (e) {
-        console.error(e);
-    }
 
     return interaction.reply({ embeds: [embed] });
 };

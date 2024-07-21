@@ -3,6 +3,7 @@ import fs from 'fs';
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { exec } from 'child_process';
 import { client } from '..';
+import dayjs from 'dayjs';
 
 export const options = {
     ...new SlashCommandBuilder()
@@ -29,15 +30,13 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const time = interaction.options.getString('time', true);
     const platform = interaction.options.getString('platform', true);
 
-    const thailandTime = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toLocaleString('en-US', {
-        timeZone: 'Asia/Bangkok',
-    });
-
-    const logEntry = `Username: ${interaction.user.username}, Action: Shutdown, Thailand Time: ${thailandTime}\n`;
-
     try {
         const logFilePath = path.join(__dirname, '../command_log.log');
-        fs.appendFileSync(logFilePath, logEntry, 'utf8');
+        fs.appendFileSync(
+            logFilePath,
+            `Username: ${interaction.user.username}, Action: Shutdown, Thailand Time: ${dayjs().format('YYYY-MM-DD HH:mm')}\n`,
+            'utf8',
+        );
     } catch (e) {
         console.error(e);
     }
