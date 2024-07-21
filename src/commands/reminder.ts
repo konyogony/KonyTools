@@ -78,8 +78,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     const delay = utcReminder - utcNow;
 
-    const thailandTimeOffset = 7;
-    const thailandTime = new Date(utcNow + thailandTimeOffset * 60 * 60 * 1000).toLocaleString('en-US', {
+    const thailandTime = new Date(utcNow + 7 * 60 * 60 * 1000).toLocaleString('en-US', {
         timeZone: 'Asia/Bangkok',
     });
 

@@ -6,7 +6,7 @@ import config from './utils/config';
 
 dotenv.config();
 
-const client = new Client({
+export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -15,6 +15,7 @@ const client = new Client({
         GatewayIntentBits.DirectMessageReactions,
     ],
 });
+
 client.once('ready', async () => {
     if (!client.user) return;
     console.log(`Logged in as ${client.user.tag}!`);
