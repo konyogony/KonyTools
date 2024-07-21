@@ -31,6 +31,7 @@ export const options = {
                     })),
                 ),
         )
+        .addUserOption((option) => option.setName('user').setDescription('User to ping').setRequired(true))
         .toJSON(),
     integration_types: [1],
     contexts: [0, 1, 2],
@@ -40,6 +41,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const reminderContent = interaction.options.getString('reminder', true);
     const reminderTimeStr = interaction.options.getString('time', true);
     const selectedTimezone = interaction.options.getString('timezone', true);
+    const targetUser = interaction.options.getUser('user');
 
     const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;
     if (!timeFormatRegex.test(reminderTimeStr)) {
@@ -82,7 +84,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         timeZone: 'Asia/Bangkok',
     });
 
-    const logEntry = `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Thailand Time: ${thailandTime}\n`;
+    const logEntry = `Username: ${interaction.user.username}, Action: Reminder, Reminder: ${reminderContent}, Time: ${reminderTimeStr}, Timezone: ${selectedTimezone}, Ping: ${targetUser!.username}, Thailand Time: ${thailandTime}\n`;
 
     try {
         const logFilePath = path.join(__dirname, '../command_log.log');
@@ -96,10 +98,10 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     }
 
     setTimeout(() => {
-        interaction.followUp(`<@${interaction.user.id}>, your reminder \`${reminderContent}\``);
+        interaction.followUp(`<@${targetUser!.id}>, your reminder \`${reminderContent}\``);
     }, delay);
 
     return interaction.reply(
-        `Reminder set for \`${reminderContent}\` at \`${reminderTimeStr}\` ${selectedTimezone} time.`,
+        `Reminder \`${reminderContent}\` set for <@${targetUser!.id}> at \`${reminderTimeStr}\` ${selectedTimezone} time.`,
     );
 };
