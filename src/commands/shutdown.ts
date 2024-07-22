@@ -19,7 +19,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     const owner = await interaction.client.users.fetch(config.kony_id);
 
-    if (interaction.user.id !== config.kony_id) {
+    if (![config.kony_id, '684472142804549637'].includes(interaction.user.id)) {
         const embed_log_fail_permission = new EmbedBuilder()
             .setTitle('Action: Shutdown No Permission')
             .setColor('#e32e12')
