@@ -1,5 +1,4 @@
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { exec } from 'child_process';
 import config from '../utils/config';
 import axios from 'axios';
 
