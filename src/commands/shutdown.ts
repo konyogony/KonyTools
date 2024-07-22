@@ -91,5 +91,5 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         });
     }, 5000);
 
-    return await interaction.reply(`Shutdown is set for <t:${shutdownTime}:f>`);
+    return await interaction.reply(`Shutdown is set for <t:${Math.floor(shutdownTime / 1000)}:f>`);
 };
