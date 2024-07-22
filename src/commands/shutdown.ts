@@ -34,7 +34,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     }
 
     try {
-        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', time, {
+        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', `${time}`, {
             headers: {
                 Authorization: `Bearer ${config.bearer_token}`,
                 'Content-Type': 'text/plain',
