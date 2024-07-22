@@ -43,6 +43,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     if (!timeFormatRegex.test(reminderTimeStr)) {
         const embed_log_fail_format = new EmbedBuilder()
             .setTitle('Action: Reminder Invalid Time')
+            .setColor(0xe32e12)
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
@@ -94,6 +95,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const embed_log_fail_past = new EmbedBuilder()
             .setTitle('Action: Reminder in the past')
             .setThumbnail(interaction.user.displayAvatarURL())
+            .setColor(0xe32e12)
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
                 { name: 'utcReminder', value: `${utcReminder}` },
@@ -126,6 +128,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         try {
             const embed_log_success_send = new EmbedBuilder()
                 .setTitle('Action: Reminder Sent')
+                .setColor(0x4f9400)
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
@@ -146,8 +149,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             return await interaction.followUp({ embeds: [embed_success_send] });
         } catch (e) {
             const embed_log_fail_send = new EmbedBuilder()
-                .setTitle('Action: Reminder Sent')
+                .setTitle('Action: Reminder Sent Failure')
                 .setThumbnail(interaction.user.displayAvatarURL())
+                .setColor(0xe32e12)
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
                     { name: 'Reminder Content', value: `${reminderContent}` },
@@ -163,6 +167,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     const embed_log_success_create = new EmbedBuilder()
         .setTitle('Action: Reminder Created')
+        .setColor(0x4f9400)
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
@@ -176,6 +181,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     const embed_success_create = new EmbedBuilder()
         .setTitle('Reminder created')
+        .setColor(0x4f9400)
         .addFields(
             { name: 'Content', value: `${reminderContent}` },
             { name: 'Time', value: `<t:${Math.floor(utcReminder / 1000)}:f>` },
