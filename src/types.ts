@@ -7,6 +7,14 @@ export interface IReminder {
     user_mention_id: string;
 }
 
+export interface INote {
+    interaction_user_id: string;
+    interaction_user_img: string;
+    time_created: number;
+    public: boolean;
+    content: string;
+}
+
 interface Faction {
     team_id: string;
     nickname: string;

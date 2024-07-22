@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { reminderList } from '../reminderList';
+import { reminderList } from '../storage';
 import config from '../utils/config';
 
 const timezones = [
