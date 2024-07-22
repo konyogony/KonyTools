@@ -116,6 +116,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const reminderToPush = {
         interaction_user_id: interaction.user.id,
         interaction_user_img: interaction.user.displayAvatarURL(),
+        time_created: utcNow,
         content: reminderContent,
         time: utcReminder,
         timezone: selectedTimezone,

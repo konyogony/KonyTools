@@ -60,12 +60,20 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         case 'reminders': {
             reminderList.forEach(async (reminder) => {
                 const embed = new EmbedBuilder()
-                    .setTitle(reminder.content)
+                    .setTitle(reminder.content.slice(0, 20) + (reminder.content.length > 20 ? '...' : ''))
                     .setTimestamp(new Date())
                     .addFields([
                         {
                             name: 'Author',
                             value: `The author of this reminder is <@${reminder.interaction_user_id}>`,
+                        },
+                        {
+                            name: 'Content',
+                            value: `\`\`\`${reminder.content}\`\`\``,
+                        },
+                        {
+                            name: 'Time Created',
+                            value: `<t:${Math.floor(reminder.time_created / 1000)}:f>`,
                         },
                         {
                             name: 'Time',
@@ -87,9 +95,13 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .forEach(async (note) => {
                     try {
                         const embed = new EmbedBuilder()
-                            .setTitle(note.content)
+                            .setTitle(note.content.slice(0, 20) + (note.content.length > 20 ? '...' : ''))
                             .addFields([
                                 { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
+                                {
+                                    name: 'Content',
+                                    value: `\`\`\`${note.content}\`\`\``,
+                                },
                                 {
                                     name: 'Time Created',
                                     value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
@@ -116,9 +128,31 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                                 const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
                                 if (noteIndex !== -1) notesList.splice(noteIndex, 1);
                                 await i.reply({ content: 'Note deleted', ephemeral: true });
+                                const embed_log_success = new EmbedBuilder()
+                                    .setTitle(`Action: Public Note Remove Success`)
+                                    .setColor(0x4f9400)
+                                    .setTimestamp(new Date())
+                                    .setThumbnail(interaction.user.displayAvatarURL())
+                                    .setFields([
+                                        { name: 'User', value: `<@${interaction.user.id}>` },
+                                        { name: 'Note Content', value: note.content },
+                                        { name: 'Note Time', value: `<t:${Math.floor(note.time_created / 1000)}:f>` },
+                                    ]);
+                                if (owner) await owner.send({ embeds: [embed_log_success] });
                                 collector.stop();
                             } else {
                                 await i.reply({ content: 'You are not the owner of this note', ephemeral: true });
+                                const embed_log_success = new EmbedBuilder()
+                                    .setTitle(`Action: Public Note Remove Fail`)
+                                    .setColor('#e32e12')
+                                    .setTimestamp(new Date())
+                                    .setThumbnail(interaction.user.displayAvatarURL())
+                                    .setFields([
+                                        { name: 'User', value: `<@${interaction.user.id}>` },
+                                        { name: 'Note Content', value: note.content },
+                                        { name: 'Note Time', value: `<t:${Math.floor(note.time_created / 1000)}:f>` },
+                                    ]);
+                                if (owner) await owner.send({ embeds: [embed_log_success] });
                             }
                         });
                         collector.on('end', (_, reason) => {
@@ -136,9 +170,13 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .forEach(async (note) => {
                     try {
                         const embed = new EmbedBuilder()
-                            .setTitle(note.content)
+                            .setTitle(note.content.slice(0, 20) + (note.content.length > 20 ? '...' : ''))
                             .addFields([
                                 { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
+                                {
+                                    name: 'Content',
+                                    value: `\`\`\`${note.content}\`\`\``,
+                                },
                                 {
                                     name: 'Time Created',
                                     value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
@@ -154,6 +192,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             embeds: [embed],
                             components: [row],
                             fetchReply: true,
+                            ephemeral: true,
                         });
                         const collector = reply.createMessageComponentCollector({
                             componentType: ComponentType.Button,
@@ -162,6 +201,17 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         const handleTimeout = () => reply.edit({ components: [] });
                         collector.on('collect', async (i) => {
                             await i.reply({ content: 'Note deleted', ephemeral: true });
+                            const embed_log_success = new EmbedBuilder()
+                                .setTitle(`Action: Private Note Remove Success`)
+                                .setColor(0x4f9400)
+                                .setTimestamp(new Date())
+                                .setThumbnail(interaction.user.displayAvatarURL())
+                                .setFields([
+                                    { name: 'User', value: `<@${interaction.user.id}>` },
+                                    { name: 'Note Content', value: note.content },
+                                    { name: 'Note Time', value: `<t:${Math.floor(note.time_created / 1000)}:f>` },
+                                ]);
+                            if (owner) await owner.send({ embeds: [embed_log_success] });
                             collector.stop();
                         });
                         collector.on('end', (_, reason) => {

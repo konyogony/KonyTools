@@ -4,6 +4,7 @@ export interface IReminder {
     content: string;
     time: number;
     timezone: string;
+    time_created: number;
     user_mention_id: string;
 }
 
