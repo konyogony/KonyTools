@@ -1,5 +1,4 @@
 import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
-import { getEloStats, getFaceitData, timeSince } from './utils/util';
 import * as dotenv from 'dotenv';
 import { readdirSync } from 'node:fs';
 import config from './utils/config';
@@ -13,9 +12,8 @@ export const client = new Client({
 client.once('ready', async () => {
     if (!client.user) return;
     console.log(`Logged in as ${client.user.tag}!`);
-    const [data, _] = await getFaceitData('kony_ogony');
     client.user.setActivity({
-        name: `🎮 ELO: ${data.games.cs2.faceit_elo} | LVL ${getEloStats(data.games.cs2.faceit_elo).level}`,
+        name: `Bot ready for use!`,
         type: ActivityType.Custom,
         state: '',
     });

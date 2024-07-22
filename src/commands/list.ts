@@ -6,7 +6,8 @@ export const options = new SlashCommandBuilder().setName('list').setDescription(
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const embed_log = new EmbedBuilder()
-        .setTitle('Action: List')
+        .setTitle('Action: List Success')
+        .setColor(0x4f9400)
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },

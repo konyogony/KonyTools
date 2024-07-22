@@ -1,6 +1,6 @@
 import type { IMatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
 
 export const options = new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON();
@@ -14,6 +14,12 @@ const isWinner = (match: IMatch): boolean => {
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const [faceit_data, match_data] = await getFaceitData('kony_ogony');
     const [{ playerstats: stats }, { response: players }] = await getSteamData(faceit_data.steam_id_64);
+
+    interaction.client.user.setActivity({
+        name: `🎮 ELO: ${faceit_data.games.cs2.faceit_elo} | LVL ${getEloStats(faceit_data.games.cs2.faceit_elo).level}`,
+        type: ActivityType.Custom,
+        state: '',
+    });
 
     const activated_at = Math.floor(Date.parse(faceit_data.activated_at) / 1000);
     const winner = isWinner(match_data.items[0]);
@@ -63,6 +69,14 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             name: `Last game: ${winner ? 'WIN' : 'LOSS'}`,
             value: `kony_ogony has ${winner ? 'won' : 'lost'} the last match`,
         });
-
+    setTimeout(
+        () =>
+            interaction.client.user.setActivity({
+                name: `Bot ready for use! :steam_happy_pd:`,
+                type: ActivityType.Custom,
+                state: '',
+            }),
+        15000,
+    );
     return await interaction.reply({ embeds: [embed] });
 };
