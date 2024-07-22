@@ -46,8 +46,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
-                { name: 'Reminder Content', value: `${reminderContent}` },
-                { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                { name: 'Reminder Content', value: reminderContent },
+                { name: 'Reminder Time', value: reminderTimeStr },
                 { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                 { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
                 { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
@@ -99,8 +99,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'utcReminder', value: `${utcReminder}` },
                 { name: 'utcNow', value: `${utcNow}` },
                 { name: 'delay', value: `${delay}` },
-                { name: 'Reminder Content', value: `${reminderContent}` },
-                { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                { name: 'Reminder Content', value: reminderContent },
+                { name: 'Reminder Time', value: reminderTimeStr },
                 { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                 { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
                 { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
@@ -129,8 +129,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
-                    { name: 'Reminder Content', value: `${reminderContent}` },
-                    { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                    { name: 'Reminder Content', value: reminderContent },
+                    { name: 'Reminder Time', value: reminderTimeStr },
                     { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                     { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
                     { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
@@ -150,8 +150,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
-                    { name: 'Reminder Content', value: `${reminderContent}` },
-                    { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                    { name: 'Reminder Content', value: reminderContent },
+                    { name: 'Reminder Time', value: reminderTimeStr },
                     { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                     { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
                     { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
@@ -166,8 +166,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
-            { name: 'Reminder Content', value: `${reminderContent}` },
-            { name: 'Reminder Time', value: `${reminderTimeStr}` },
+            { name: 'Reminder Content', value: reminderContent },
+            { name: 'Reminder Time', value: reminderTimeStr },
             { name: 'Reminder Timezone', value: `${selectedTimezone}` },
             { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
             { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
@@ -177,7 +177,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const embed_success_create = new EmbedBuilder()
         .setTitle('Reminder created')
         .addFields(
-            { name: 'Content', value: `${reminderContent}` },
+            { name: 'Content', value: reminderContent },
             { name: 'Time', value: `<t:${Math.floor(utcReminder / 1000)}:f>` },
             { name: 'User to ping', value: `<@${targetUser!.id}>` },
         );
