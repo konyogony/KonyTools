@@ -115,9 +115,10 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     if (note.interaction_user_id === i.user.id) {
                         console.log(3);
                         const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
+                        console.log(noteIndex);
                         if (noteIndex !== -1) reminderList.splice(noteIndex, 1);
                         await i.reply({ content: 'Note deleted', ephemeral: true });
-                        interaction.deleteReply();
+                        await interaction.deleteReply();
                         collector.stop();
                     } else {
                         await i.reply({ content: 'You are not owner of this note', ephemeral: true });
