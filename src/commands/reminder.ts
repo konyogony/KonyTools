@@ -38,24 +38,26 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const targetUser = interaction.options.getUser('user');
 
     const owner = await interaction.client.users.fetch(config.kony_id);
-    const embed_log = new EmbedBuilder()
-        .setTitle('Action: Reminder')
-        .setThumbnail(interaction.user.displayAvatarURL())
-        .setFields([
-            { name: 'User', value: `<@${interaction.user.id}>` },
-            { name: 'Reminder Content', value: `${reminderContent}` },
-            { name: 'Reminder Time', value: `${reminderTimeStr}` },
-            { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
-        ]);
-    if (owner) await owner.send({ embeds: [embed_log] });
 
     const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;
-    if (!timeFormatRegex.test(reminderTimeStr))
-        return await interaction.reply(
-            'Invalid time format. Please use the format "DD MMM HH:mm" (e.g., "20 July 22:38").',
-        );
-
+    if (!timeFormatRegex.test(reminderTimeStr)) {
+        const embed_log_fail_format = new EmbedBuilder()
+            .setTitle('Action: Reminder Invalid Time')
+            .setThumbnail(interaction.user.displayAvatarURL())
+            .setFields([
+                { name: 'User', value: `<@${interaction.user.id}>` },
+                { name: 'Reminder Content', value: `${reminderContent}` },
+                { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+                { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+            ]);
+        if (owner) await owner.send({ embeds: [embed_log_fail_format] });
+        return await interaction.reply({
+            content: 'Invalid time format. Please use the format "DD MMM HH:mm" (e.g., "20 July 22:38").',
+            ephemeral: true,
+        });
+    }
     const utcNow = new Date().getTime();
 
     const [day, monthName, time] = reminderTimeStr.split(' ');
@@ -87,8 +89,28 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     const utcReminder = localDate.getTime();
     const delay = utcReminder - utcNow;
-    if (delay < 0) return await interaction.reply('The reminder time is in the past. Please set a future time.');
 
+    if (delay < 0) {
+        const embed_log_fail_past = new EmbedBuilder()
+            .setTitle('Action: Reminder in the past')
+            .setThumbnail(interaction.user.displayAvatarURL())
+            .setFields([
+                { name: 'User', value: `<@${interaction.user.id}>` },
+                { name: 'utcReminder', value: `${utcReminder}` },
+                { name: 'utcNow', value: `${utcNow}` },
+                { name: 'delay', value: `${delay}` },
+                { name: 'Reminder Content', value: `${reminderContent}` },
+                { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+                { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+            ]);
+        if (owner) await owner.send({ embeds: [embed_log_fail_past] });
+        return await interaction.reply({
+            content: 'The reminder time is in the past. Please set a future time.',
+            ephemeral: true,
+        });
+    }
     const reminderToPush = {
         interaction_user_id: interaction.user.id,
         interaction_user_img: interaction.user.displayAvatarURL(),
@@ -101,17 +123,58 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     reminderList.push(reminderToPush);
 
     setTimeout(async () => {
-        const embed = new EmbedBuilder()
-            .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
-            .setDescription(
-                `<@${targetUser!.id}>, the time is <t:${Math.floor(utcReminder / 1000)}:f>. \n \`\`\`${reminderContent}\`\`\``,
-            );
-        await interaction.followUp({ embeds: [embed] });
-        const reminderIndex = reminderList.findIndex((reminderFound) => reminderToPush === reminderFound);
-        if (reminderIndex !== -1) reminderList.splice(reminderIndex, 1);
+        try {
+            const embed_log_success_send = new EmbedBuilder()
+                .setTitle('Action: Reminder Sent')
+                .setThumbnail(interaction.user.displayAvatarURL())
+                .setFields([
+                    { name: 'User', value: `<@${interaction.user.id}>` },
+                    { name: 'Reminder Content', value: `${reminderContent}` },
+                    { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                    { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+                    { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                    { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+                ]);
+            if (owner) await owner.send({ embeds: [embed_log_success_send] });
+
+            const reminderIndex = reminderList.findIndex((reminderFound) => reminderToPush === reminderFound);
+            if (reminderIndex !== -1) reminderList.splice(reminderIndex, 1);
+
+            const embed_success_send = new EmbedBuilder()
+                .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
+                .setDescription(`<@${targetUser!.id}>, your reminder, \n \`\`\`${reminderContent}\`\`\``);
+            return await interaction.followUp({ embeds: [embed_success_send] });
+        } catch (e) {
+            const embed_log_fail_send = new EmbedBuilder()
+                .setTitle('Action: Reminder Sent')
+                .setThumbnail(interaction.user.displayAvatarURL())
+                .setFields([
+                    { name: 'User', value: `<@${interaction.user.id}>` },
+                    { name: 'Reminder Content', value: `${reminderContent}` },
+                    { name: 'Reminder Time', value: `${reminderTimeStr}` },
+                    { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+                    { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                    { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+                    { name: 'Error', value: `${e}` },
+                ]);
+            if (owner) await owner.send({ embeds: [embed_log_fail_send] });
+        }
     }, delay);
 
-    const embed = new EmbedBuilder()
+    const embed_log_success_create = new EmbedBuilder()
+        .setTitle('Action: Reminder Created')
+        .setThumbnail(interaction.user.displayAvatarURL())
+        .setFields([
+            { name: 'User', value: `<@${interaction.user.id}>` },
+            { name: 'Reminder Content', value: `${reminderContent}` },
+            { name: 'Reminder Time', value: `${reminderTimeStr}` },
+            { name: 'Reminder Timezone', value: `${selectedTimezone}` },
+            { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
+        ]);
+    if (owner) await owner.send({ embeds: [embed_log_success_create] });
+
+    const embed_success_create = new EmbedBuilder()
         .setTitle('Reminder created')
         .addFields(
             { name: 'Content', value: `${reminderContent}` },
@@ -120,7 +183,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         );
 
     return await interaction.reply({
-        embeds: [embed],
-        allowedMentions: { parse: [] },
+        embeds: [embed_success_create],
     });
 };
