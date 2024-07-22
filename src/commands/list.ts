@@ -88,7 +88,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     .setTitle(note.content)
                     .setTimestamp()
                     .addFields([
-                        { name: 'Author', value: `The author of this reminder is <@${note.interaction_user_id}>` },
+                        { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
                         {
                             name: 'Time Created',
                             value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
@@ -101,6 +101,15 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     .setStyle(ButtonStyle.Danger);
                 const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
                 await interaction.followUp({ embeds: [embed], components: [row] });
+                //On button click
+                const removeNote = (interaction) => {
+                    if (note.interaction_user_id === interaction.user.id) {
+                        const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
+                        if (noteIndex !== -1) reminderList.splice(noteIndex, 1);
+                    } else {
+                        await interaction.reply({ content: 'You are not owner off this note' });
+                    }
+                };
             });
 
             return;
