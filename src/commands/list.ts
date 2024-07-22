@@ -85,6 +85,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             );
 
             notesList.forEach(async (note) => {
+                console.log(1);
                 const embed = new EmbedBuilder()
                     .setTitle(note.content)
                     .setTimestamp()
@@ -110,16 +111,23 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 const handleTimeout = () => interaction.editReply({ components: [] });
 
                 collector.on('collect', async (i) => {
+                    console.log(2);
                     if (note.interaction_user_id === i.user.id) {
+                        console.log(3);
                         const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
                         if (noteIndex !== -1) reminderList.splice(noteIndex, 1);
+                        await i.reply({ content: 'Note deleted', ephemeral: true });
+                        interaction.deleteReply();
                         collector.stop();
                     } else {
-                        await i.reply({ content: 'You are not owner of this note' });
+                        await i.reply({ content: 'You are not owner of this note', ephemeral: true });
                     }
                 });
+                console.log(4);
 
                 collector.on('end', (_, e) => (e === 'time' ? void handleTimeout() : void 0));
+
+                console.log(5);
 
                 return;
             });
