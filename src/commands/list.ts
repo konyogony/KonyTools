@@ -99,7 +99,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     .setCustomId('remove')
                     .setLabel('Remove this note')
                     .setStyle(ButtonStyle.Danger);
-                const row = new ActionRowBuilder().addComponents(remove);
+                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
                 await interaction.followUp({ embeds: [embed], components: [row] });
             });
 
