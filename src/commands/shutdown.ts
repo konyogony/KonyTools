@@ -62,7 +62,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         () => {
             clearInterval(timer);
             interaction.client.user.setActivity({
-                name: `Bot ready for use! :steam_happy_pd:`,
+                name: `Bot ready for use!`,
                 type: ActivityType.Custom,
                 state: '',
             });
