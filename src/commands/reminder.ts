@@ -35,7 +35,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const reminderContent = interaction.options.getString('reminder', true);
     const reminderTimeStr = interaction.options.getString('time', true).toLowerCase();
     const selectedTimezone = interaction.options.getString('timezone', true);
-    const targetUser = interaction.options.getUser('user');
+    const targetUser = interaction.options.getUser('user', true);
 
     const owner = await interaction.client.users.fetch(config.kony_id);
 
@@ -49,7 +49,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'Reminder Content', value: reminderContent },
                 { name: 'Reminder Time', value: reminderTimeStr },
                 { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-                { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                { name: 'Reminder mention', value: `<@${targetUser.id}>` },
                 { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
             ]);
         if (owner) await owner.send({ embeds: [embed_log_fail_format] });
@@ -102,7 +102,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'Reminder Content', value: reminderContent },
                 { name: 'Reminder Time', value: reminderTimeStr },
                 { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-                { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                { name: 'Reminder mention', value: `<@${targetUser.id}>` },
                 { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
             ]);
         if (owner) await owner.send({ embeds: [embed_log_fail_past] });
@@ -117,7 +117,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         content: reminderContent,
         time: utcReminder,
         timezone: selectedTimezone,
-        user_mention_id: targetUser!.id,
+        user_mention_id: targetUser.id,
     };
 
     reminderList.push(reminderToPush);
@@ -132,7 +132,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     { name: 'Reminder Content', value: reminderContent },
                     { name: 'Reminder Time', value: reminderTimeStr },
                     { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-                    { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                    { name: 'Reminder mention', value: `<@${targetUser.id}>` },
                     { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
                 ]);
             if (owner) await owner.send({ embeds: [embed_log_success_send] });
@@ -142,7 +142,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
             const embed_success_send = new EmbedBuilder()
                 .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
-                .setDescription(`<@${targetUser!.id}>, your reminder, \n \`\`\`${reminderContent}\`\`\``);
+                .setDescription(`<@${targetUser.id}>, your reminder, \n \`\`\`${reminderContent}\`\`\``);
             return await interaction.followUp({ embeds: [embed_success_send] });
         } catch (e) {
             const embed_log_fail_send = new EmbedBuilder()
@@ -153,7 +153,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     { name: 'Reminder Content', value: reminderContent },
                     { name: 'Reminder Time', value: reminderTimeStr },
                     { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-                    { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+                    { name: 'Reminder mention', value: `<@${targetUser.id}>` },
                     { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
                     { name: 'Error', value: `${e}` },
                 ]);
@@ -169,7 +169,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             { name: 'Reminder Content', value: reminderContent },
             { name: 'Reminder Time', value: reminderTimeStr },
             { name: 'Reminder Timezone', value: `${selectedTimezone}` },
-            { name: 'Reminder mention', value: `<@${targetUser!.id}>` },
+            { name: 'Reminder mention', value: `<@${targetUser.id}>` },
             { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
         ]);
     if (owner) await owner.send({ embeds: [embed_log_success_create] });
@@ -179,7 +179,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .addFields(
             { name: 'Content', value: reminderContent },
             { name: 'Time', value: `<t:${Math.floor(utcReminder / 1000)}:f>` },
-            { name: 'User to ping', value: `<@${targetUser!.id}>` },
+            { name: 'User to ping', value: `<@${targetUser.id}>` },
         );
 
     return await interaction.reply({
