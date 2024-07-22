@@ -14,7 +14,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([{ name: 'User', value: `<@${interaction.user.id}>` }]);
-        if (owner) await owner.send({ embeds: [embed_log_fail_permission] });
+        await owner.send({ embeds: [embed_log_fail_permission] });
         return await interaction.reply('Sorry! You dont have permission to perform this action');
     }
 
@@ -30,7 +30,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([{ name: 'User', value: `<@${interaction.user.id}>` }]);
-        if (owner) await owner.send({ embeds: [embed_log_success] });
+        await owner.send({ embeds: [embed_log_success] });
 
         await interaction.reply(['```', command.replaceAll(config.github_token, 'TOKEN_REDACTED'), '```'].join('\n'));
         setTimeout(() => {
@@ -49,7 +49,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'User', value: `<@${interaction.user.id}>` },
                 { name: 'Error', value: `${error}` },
             ]);
-        if (owner) await owner.send({ embeds: [embed_log_fail_error] });
+        await owner.send({ embeds: [embed_log_fail_error] });
         console.log(error);
         return await interaction.reply('An error occured, check the console');
     }

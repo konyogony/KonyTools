@@ -5,12 +5,8 @@ import axios from 'axios';
 export const options = new SlashCommandBuilder()
     .setName('shutdown')
     .setDescription('Set a timer to shutdown')
-    .addNumberOption((option) =>
-        option
-            .setName('time')
-            .setDescription('In how many minutes would it shut down')
-            .setRequired(true)
-            .setMinValue(1),
+    .addNumberOption((n) =>
+        n.setName('time').setDescription('In how many minutes would it shut down').setRequired(true).setMinValue(1),
     )
     .toJSON();
 
@@ -29,7 +25,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'User', value: `<@${interaction.user.id}>` },
                 { name: 'Minutes', value: `${time}` },
             ]);
-        if (owner) await owner.send({ embeds: [embed_log_fail_permission] });
+        await owner.send({ embeds: [embed_log_fail_permission] });
         return await interaction.reply('Sorry! You dont have permission to perform this action');
     }
 
@@ -56,7 +52,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             { name: 'User', value: `<@${interaction.user.id}>` },
             { name: 'Minutes', value: `${time}` },
         ]);
-    if (owner) await owner.send({ embeds: [embed_log_success] });
+    await owner.send({ embeds: [embed_log_success] });
 
     setTimeout(
         () => {

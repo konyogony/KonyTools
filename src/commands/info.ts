@@ -38,7 +38,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             { name: 'Hours', value: `${hours}` },
         ]);
     const owner = await interaction.client.users.fetch(config.kony_id);
-    if (owner) await owner.send({ embeds: [embed_log_success] });
+    await owner.send({ embeds: [embed_log_success] });
 
     const embed = new EmbedBuilder()
         .setColor(getEloStats(faceit_data.elo).color)
