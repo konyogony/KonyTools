@@ -32,7 +32,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         return await interaction.reply('Sorry! You dont have permission to perform this action');
 
     try {
-        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', time);
+        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', time, {
+            headers: { Authorization: `Bearer ${config.bearer_token}` },
+        });
     } catch (error) {
         console.log(error);
     }
