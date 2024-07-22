@@ -50,7 +50,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         );
     } else if (item === 'public_notes') {
         await interaction.reply(
-            `${notesList.length === 0 ? 'No' : notesList.length} public note${notesList.length > 1 ? 's' : ''}. ${notesList.length !== 0 ? 'Here is a list:' : ''}`,
+            `${notesList.length === 0 ? 'No' : notesList.length} public notes. ${notesList.length !== 0 ? 'Here is a list:' : ''}`,
         );
     } else {
         await interaction.reply('');
@@ -95,28 +95,35 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             },
                         ])
                         .setThumbnail(note.interaction_user_img);
+
                     const remove = new ButtonBuilder()
                         .setCustomId('remove')
                         .setLabel('Remove this note')
                         .setStyle(ButtonStyle.Danger);
+
                     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
+
                     const reply = await interaction.followUp({ embeds: [embed], components: [row], fetchReply: true });
+
                     const collector = reply.createMessageComponentCollector({
                         componentType: ComponentType.Button,
                         time: 120000,
                     });
-                    const handleTimeout = () => interaction.editReply({ components: [] });
+
+                    const handleTimeout = () => reply.edit({ components: [] });
+
                     collector.on('collect', async (i) => {
                         if (note.interaction_user_id === i.user.id) {
                             const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
                             if (noteIndex !== -1) notesList.splice(noteIndex, 1);
                             await i.reply({ content: 'Note deleted', ephemeral: true });
-                            await interaction.deleteReply();
+                            await reply.delete(); // Delete the embed reply
                             collector.stop();
                         } else {
                             await i.reply({ content: 'You are not the owner of this note', ephemeral: true });
                         }
                     });
+
                     collector.on('end', (_, reason) => {
                         if (reason === 'time') handleTimeout();
                     });
@@ -126,6 +133,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             });
             return;
         }
+
         case 'private_notes': {
             break;
         }
