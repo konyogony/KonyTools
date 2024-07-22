@@ -1,12 +1,17 @@
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { exec } from 'child_process';
 import config from '../utils/config';
+import axios from 'axios';
 
 export const options = new SlashCommandBuilder()
     .setName('shutdown')
     .setDescription('Set a timer to shutdown')
     .addNumberOption((option) =>
-        option.setName('time').setDescription('In how many minutes would it shut down').setRequired(true),
+        option
+            .setName('time')
+            .setDescription('In how many minutes would it shut down')
+            .setRequired(true)
+            .setMinValue(1),
     )
     .toJSON();
 
@@ -27,7 +32,12 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     if (interaction.user.id !== config.kony_id)
         return await interaction.reply('Sorry! You dont have permission to perform this action');
 
-    exec(`shutdown -P ${time}`);
+    try {
+        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', time);
+    } catch (error) {
+        console.log(error);
+    }
+
     const shutdownTime = Date.now() + time * 60000;
 
     setInterval(() => {
