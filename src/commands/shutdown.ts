@@ -34,9 +34,15 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     }
 
     try {
-        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', time);
+        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', time, {
+            headers: {
+                Authorization: `Bearer ${config.bearer_token}`,
+                'Content-Type': 'text/plain',
+            },
+        });
     } catch (error) {
         console.log(error);
+        return await interaction.reply('An error occured, check the console');
     }
 
     const shutdownTime = Date.now() + time * 60000;
