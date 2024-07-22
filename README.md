@@ -1,6 +1,8 @@
-`/status` to get kony's faceit info
-`/reminder` to set a reminder
-`/list` to list all active reminders
+# KonyTools 
+
+`/status` to get kony's faceit info \
+`/reminder` to set a reminder \
+`/list` to list all active reminders 
 
 *More commands later!*
 
