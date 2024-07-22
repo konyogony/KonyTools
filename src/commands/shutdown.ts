@@ -48,7 +48,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const shutdownTime = Date.now() + time * 60000;
 
     const embed_log_success = new EmbedBuilder()
-        .setTitle('Action: Shutdown')
+        .setTitle('Action: Shutdown Success')
         .setColor('#4f9400')
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
