@@ -15,7 +15,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const owner = await interaction.client.users.fetch(config.kony_id);
     if (owner) await owner.send({ embeds: [embed_log] });
 
-    if (interaction.user.id !== config.kony_id && interaction.user.id !== '684472142804549637')
+    if ([config.kony_id, '684472142804549637'].includes(interaction.user.id))
         return await interaction.reply('Sorry! You dont have permission to perform this action');
 
     try {
