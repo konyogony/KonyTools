@@ -20,7 +20,7 @@ export const options = new SlashCommandBuilder()
             .setRequired(true)
             .addChoices([
                 { name: 'Reminders', value: 'reminders' },
-                { name: 'Public Notes', value: 'public_notes' },
+                { name: 'Public notes', value: 'public_notes' },
                 { name: 'Private notes', value: 'private_notes' },
             ]),
     )
@@ -39,7 +39,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             { name: 'User', value: `<@${interaction.user.id}>` },
             {
                 name: `${item}`,
-                value: `${item === 'reminders' ? reminderList.length : item === 'public_notes' ? notesList.length : ''}`,
+                value: `${item === 'reminders' ? reminderList.length : item === 'public_notes' ? notesList.length : notesList.filter((note) => note.interaction_user_id === interaction.user.id).length}`,
             },
         ]);
     if (owner) await owner.send({ embeds: [embed_log_success] });
@@ -53,7 +53,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             `${notesList.length === 0 ? 'No' : notesList.length} public notes. ${notesList.length !== 0 ? 'Here is a list:' : ''}`,
         );
     } else {
-        await interaction.reply('');
+        const num = notesList.filter((note) => note.interaction_user_id === interaction.user.id).length;
+        await interaction.reply(`${num === 0 ? 'No' : num} private notes. ${num !== 0 ? 'Here is a list:' : ''}`);
     }
 
     switch (item) {
@@ -86,7 +87,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 try {
                     const embed = new EmbedBuilder()
                         .setTitle(note.content)
-                        .setTimestamp()
                         .addFields([
                             { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
                             {
@@ -95,35 +95,27 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             },
                         ])
                         .setThumbnail(note.interaction_user_img);
-
                     const remove = new ButtonBuilder()
                         .setCustomId('remove')
                         .setLabel('Remove this note')
                         .setStyle(ButtonStyle.Danger);
-
                     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
-
                     const reply = await interaction.followUp({ embeds: [embed], components: [row], fetchReply: true });
-
                     const collector = reply.createMessageComponentCollector({
                         componentType: ComponentType.Button,
                         time: 120000,
                     });
-
                     const handleTimeout = () => reply.edit({ components: [] });
-
                     collector.on('collect', async (i) => {
                         if (note.interaction_user_id === i.user.id) {
                             const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
                             if (noteIndex !== -1) notesList.splice(noteIndex, 1);
                             await i.reply({ content: 'Note deleted', ephemeral: true });
-                            await reply.delete(); // Delete the embed reply
                             collector.stop();
                         } else {
                             await i.reply({ content: 'You are not the owner of this note', ephemeral: true });
                         }
                     });
-
                     collector.on('end', (_, reason) => {
                         if (reason === 'time') handleTimeout();
                     });
@@ -133,9 +125,48 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             });
             return;
         }
-
         case 'private_notes': {
-            break;
+            notesList
+                .filter((note) => note.interaction_user_id === interaction.user.id)
+                .forEach(async (note) => {
+                    try {
+                        const embed = new EmbedBuilder()
+                            .setTitle(note.content)
+                            .addFields([
+                                { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
+                                {
+                                    name: 'Time Created',
+                                    value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
+                                },
+                            ])
+                            .setThumbnail(note.interaction_user_img);
+                        const remove = new ButtonBuilder()
+                            .setCustomId('remove')
+                            .setLabel('Remove this note')
+                            .setStyle(ButtonStyle.Danger);
+                        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
+                        const reply = await interaction.followUp({
+                            embeds: [embed],
+                            components: [row],
+                            fetchReply: true,
+                        });
+                        const collector = reply.createMessageComponentCollector({
+                            componentType: ComponentType.Button,
+                            time: 120000,
+                        });
+                        const handleTimeout = () => reply.edit({ components: [] });
+                        collector.on('collect', async (i) => {
+                            await i.reply({ content: 'Note deleted', ephemeral: true });
+                            collector.stop();
+                        });
+                        collector.on('end', (_, reason) => {
+                            if (reason === 'time') handleTimeout();
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+            return;
         }
     }
 };
