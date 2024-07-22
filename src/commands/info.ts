@@ -27,21 +27,23 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played').value / 3600,
     );
 
-    const embed_log = new EmbedBuilder()
-        .setTitle('Action: Info')
+    const embed_log_success = new EmbedBuilder()
+        .setTitle('Action: Info Success')
+        .setTimestamp(new Date())
+        .setColor(0x4f9400)
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
             { name: 'ELO', value: `${faceit_data.games.cs2.faceit_elo}` },
             { name: 'Hours', value: `${hours}` },
-            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
         ]);
     const owner = await interaction.client.users.fetch(config.kony_id);
-    if (owner) await owner.send({ embeds: [embed_log] });
+    if (owner) await owner.send({ embeds: [embed_log_success] });
 
     const embed = new EmbedBuilder()
         .setColor(getEloStats(faceit_data.elo).color)
         .setTitle(faceit_data.steam_nickname)
+        .setTimestamp(new Date())
         .setThumbnail(faceit_data.avatar)
         .addFields(
             {

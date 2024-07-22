@@ -23,11 +23,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const embed_log_fail_permission = new EmbedBuilder()
             .setTitle('Action: Shutdown No Permission')
             .setColor('#e32e12')
+            .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
                 { name: 'Minutes', value: `${time}` },
-                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
             ]);
         if (owner) await owner.send({ embeds: [embed_log_fail_permission] });
         return await interaction.reply('Sorry! You dont have permission to perform this action');
@@ -50,11 +50,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const embed_log_success = new EmbedBuilder()
         .setTitle('Action: Shutdown Success')
         .setColor('#4f9400')
+        .setTimestamp(new Date())
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
             { name: 'Minutes', value: `${time}` },
-            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
         ]);
     if (owner) await owner.send({ embeds: [embed_log_success] });
 

@@ -44,6 +44,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const embed_log_fail_format = new EmbedBuilder()
             .setTitle('Action: Reminder Invalid Time')
             .setColor('#e32e12')
+            .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
@@ -51,7 +52,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'Reminder Time', value: reminderTimeStr },
                 { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                 { name: 'Reminder mention', value: `<@${targetUser.id}>` },
-                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
             ]);
         if (owner) await owner.send({ embeds: [embed_log_fail_format] });
         return await interaction.reply({
@@ -96,6 +96,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             .setTitle('Action: Reminder in the past')
             .setThumbnail(interaction.user.displayAvatarURL())
             .setColor('#e32e12')
+            .setTimestamp(new Date())
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
                 { name: 'utcReminder', value: `${utcReminder}` },
@@ -105,7 +106,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 { name: 'Reminder Time', value: reminderTimeStr },
                 { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                 { name: 'Reminder mention', value: `<@${targetUser.id}>` },
-                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
             ]);
         if (owner) await owner.send({ embeds: [embed_log_fail_past] });
         return await interaction.reply({
@@ -129,6 +129,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const embed_log_success_send = new EmbedBuilder()
                 .setTitle('Action: Reminder Sent')
                 .setColor('#4f9400')
+                .setTimestamp(new Date())
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
@@ -136,7 +137,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     { name: 'Reminder Time', value: reminderTimeStr },
                     { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                     { name: 'Reminder mention', value: `<@${targetUser.id}>` },
-                    { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
                 ]);
             if (owner) await owner.send({ embeds: [embed_log_success_send] });
 
@@ -151,6 +151,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const embed_log_fail_send = new EmbedBuilder()
                 .setTitle('Action: Reminder Sent Failure')
                 .setThumbnail(interaction.user.displayAvatarURL())
+                .setTimestamp(new Date())
                 .setColor('#e32e12')
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
@@ -158,7 +159,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     { name: 'Reminder Time', value: reminderTimeStr },
                     { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                     { name: 'Reminder mention', value: `<@${targetUser.id}>` },
-                    { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
                     { name: 'Error', value: `${e}` },
                 ]);
             if (owner) await owner.send({ embeds: [embed_log_fail_send] });
@@ -168,6 +168,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const embed_log_success_create = new EmbedBuilder()
         .setTitle('Action: Reminder Created')
         .setColor('#4f9400')
+        .setTimestamp(new Date())
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
@@ -175,13 +176,13 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             { name: 'Reminder Time', value: reminderTimeStr },
             { name: 'Reminder Timezone', value: `${selectedTimezone}` },
             { name: 'Reminder mention', value: `<@${targetUser.id}>` },
-            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
         ]);
     if (owner) await owner.send({ embeds: [embed_log_success_create] });
 
     const embed_success_create = new EmbedBuilder()
         .setTitle('Reminder created')
         .setColor('#4f9400')
+        .setTimestamp(new Date())
         .addFields(
             { name: 'Content', value: reminderContent },
             { name: 'Time', value: `<t:${Math.floor(utcReminder / 1000)}:f>` },

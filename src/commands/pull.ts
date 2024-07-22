@@ -11,11 +11,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const embed_log_fail_permission = new EmbedBuilder()
             .setTitle('Action: Pull No Permission')
             .setColor('#e32e12')
+            .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
-            .setFields([
-                { name: 'User', value: `<@${interaction.user.id}>` },
-                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
-            ]);
+            .setFields([{ name: 'User', value: `<@${interaction.user.id}>` }]);
         if (owner) await owner.send({ embeds: [embed_log_fail_permission] });
         return await interaction.reply('Sorry! You dont have permission to perform this action');
     }
@@ -29,11 +27,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const embed_log_success = new EmbedBuilder()
             .setTitle('Action: Pull Success')
             .setColor('#4f9400')
+            .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
-            .setFields([
-                { name: 'User', value: `<@${interaction.user.id}>` },
-                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
-            ]);
+            .setFields([{ name: 'User', value: `<@${interaction.user.id}>` }]);
         if (owner) await owner.send({ embeds: [embed_log_success] });
 
         await interaction.reply(['```', command.replaceAll(config.github_token, 'TOKEN_REDACTED'), '```'].join('\n'));
@@ -47,11 +43,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         const embed_log_fail_error = new EmbedBuilder()
             .setTitle('Action: Pull Error')
             .setColor('#e32e12')
+            .setTimestamp(new Date())
             .setThumbnail(interaction.user.displayAvatarURL())
             .setFields([
                 { name: 'User', value: `<@${interaction.user.id}>` },
                 { name: 'Error', value: `${error}` },
-                { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
             ]);
         if (owner) await owner.send({ embeds: [embed_log_fail_error] });
         console.log(error);

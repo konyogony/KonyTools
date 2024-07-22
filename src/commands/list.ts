@@ -8,11 +8,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const embed_log = new EmbedBuilder()
         .setTitle('Action: List Success')
         .setColor(0x4f9400)
+        .setTimestamp(new Date())
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
             { name: 'Reminders', value: `${reminderList.length}` },
-            { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:f>` },
         ]);
     const owner = await interaction.client.users.fetch(config.kony_id);
     if (owner) await owner.send({ embeds: [embed_log] });
@@ -24,6 +24,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     reminderList.forEach(async (reminder) => {
         const embed = new EmbedBuilder()
             .setTitle(reminder.content)
+            .setTimestamp(new Date())
             .addFields([
                 { name: 'Author', value: `The author of this reminder is <@${reminder.interaction_user_id}>` },
                 {
