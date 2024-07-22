@@ -49,9 +49,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             `${reminderList.length === 0 ? 'No' : reminderList.length} reminder${reminderList.length > 1 ? 's' : ''} active right now. ${reminderList.length !== 0 ? 'Here is a list:' : ''}`,
         );
     } else if (item === 'public_notes') {
-        await interaction.reply(
-            `${notesList.length === 0 ? 'No' : notesList.length} public notes. ${notesList.length !== 0 ? 'Here is a list:' : ''}`,
-        );
+        const num = notesList.filter((note) => note.public === true).length;
+        await interaction.reply(`${num === 0 ? 'No' : num} public notes. ${num !== 0 ? 'Here is a list:' : ''}`);
     } else {
         const num = notesList.filter((note) => note.interaction_user_id === interaction.user.id).length;
         await interaction.reply(`${num === 0 ? 'No' : num} private notes. ${num !== 0 ? 'Here is a list:' : ''}`);
@@ -83,46 +82,52 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             return;
         }
         case 'public_notes': {
-            notesList.forEach(async (note) => {
-                try {
-                    const embed = new EmbedBuilder()
-                        .setTitle(note.content)
-                        .addFields([
-                            { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
-                            {
-                                name: 'Time Created',
-                                value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
-                            },
-                        ])
-                        .setThumbnail(note.interaction_user_img);
-                    const remove = new ButtonBuilder()
-                        .setCustomId('remove')
-                        .setLabel('Remove this note')
-                        .setStyle(ButtonStyle.Danger);
-                    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
-                    const reply = await interaction.followUp({ embeds: [embed], components: [row], fetchReply: true });
-                    const collector = reply.createMessageComponentCollector({
-                        componentType: ComponentType.Button,
-                        time: 120000,
-                    });
-                    const handleTimeout = () => reply.edit({ components: [] });
-                    collector.on('collect', async (i) => {
-                        if (note.interaction_user_id === i.user.id) {
-                            const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
-                            if (noteIndex !== -1) notesList.splice(noteIndex, 1);
-                            await i.reply({ content: 'Note deleted', ephemeral: true });
-                            collector.stop();
-                        } else {
-                            await i.reply({ content: 'You are not the owner of this note', ephemeral: true });
-                        }
-                    });
-                    collector.on('end', (_, reason) => {
-                        if (reason === 'time') handleTimeout();
-                    });
-                } catch (e) {
-                    console.log(e);
-                }
-            });
+            notesList
+                .filter((note) => note.public === true)
+                .forEach(async (note) => {
+                    try {
+                        const embed = new EmbedBuilder()
+                            .setTitle(note.content)
+                            .addFields([
+                                { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
+                                {
+                                    name: 'Time Created',
+                                    value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
+                                },
+                            ])
+                            .setThumbnail(note.interaction_user_img);
+                        const remove = new ButtonBuilder()
+                            .setCustomId('remove')
+                            .setLabel('Remove this note')
+                            .setStyle(ButtonStyle.Danger);
+                        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
+                        const reply = await interaction.followUp({
+                            embeds: [embed],
+                            components: [row],
+                            fetchReply: true,
+                        });
+                        const collector = reply.createMessageComponentCollector({
+                            componentType: ComponentType.Button,
+                            time: 120000,
+                        });
+                        const handleTimeout = () => reply.edit({ components: [] });
+                        collector.on('collect', async (i) => {
+                            if (note.interaction_user_id === i.user.id) {
+                                const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
+                                if (noteIndex !== -1) notesList.splice(noteIndex, 1);
+                                await i.reply({ content: 'Note deleted', ephemeral: true });
+                                collector.stop();
+                            } else {
+                                await i.reply({ content: 'You are not the owner of this note', ephemeral: true });
+                            }
+                        });
+                        collector.on('end', (_, reason) => {
+                            if (reason === 'time') handleTimeout();
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
             return;
         }
         case 'private_notes': {
