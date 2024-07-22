@@ -3,6 +3,7 @@ import {
     ButtonBuilder,
     ButtonStyle,
     ChatInputCommandInteraction,
+    ComponentType,
     EmbedBuilder,
     SlashCommandBuilder,
 } from 'discord.js';
@@ -100,16 +101,27 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     .setLabel('Remove this note')
                     .setStyle(ButtonStyle.Danger);
                 const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
-                await interaction.followUp({ embeds: [embed], components: [row] });
-                //On button click
-                const removeNote = (interaction) => {
-                    if (note.interaction_user_id === interaction.user.id) {
+                const reply = await interaction.followUp({ embeds: [embed], components: [row], fetchReply: true });
+                const collector = reply.createMessageComponentCollector({
+                    componentType: ComponentType.Button,
+                    time: 120000,
+                });
+
+                const handleTimeout = () => interaction.editReply({ components: [] });
+
+                collector.on('collect', async (i) => {
+                    if (note.interaction_user_id === i.user.id) {
                         const noteIndex = notesList.findIndex((noteFound) => noteFound === note);
                         if (noteIndex !== -1) reminderList.splice(noteIndex, 1);
+                        collector.stop();
                     } else {
-                        await interaction.reply({ content: 'You are not owner off this note' });
+                        await i.reply({ content: 'You are not owner of this note' });
                     }
-                };
+                });
+
+                collector.on('end', (_, e) => (e === 'time' ? void handleTimeout() : void 0));
+
+                return;
             });
 
             return;
