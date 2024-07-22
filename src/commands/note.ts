@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { notesList, reminderList } from '../storage';
+import { notesList } from '../storage';
 import config from '../utils/config';
 import type { INote } from '../types';
 
