@@ -37,6 +37,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         });
     } catch (error) {
         console.log(error);
+        return await interaction.reply('An error occured, check the console');
     }
 
     const shutdownTime = Date.now() + time * 60000;
