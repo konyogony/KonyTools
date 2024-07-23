@@ -112,6 +112,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         embeds: [embed_success_list],
                         components: [row],
                         fetchReply: true,
+                        ephemeral: true,
                     });
 
                     const collector = reply.createMessageComponentCollector({
@@ -142,6 +143,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 } else {
                     await interaction.followUp({
                         embeds: [embed_success_list],
+                        ephemeral: true,
                     });
                 }
             });
@@ -193,6 +195,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     embeds: [embed_success_list],
                     components: [row],
                     fetchReply: true,
+                    ephemeral: true,
                 });
 
                 const collector = reply.createMessageComponentCollector({
