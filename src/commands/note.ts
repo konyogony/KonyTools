@@ -165,5 +165,83 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
             return;
         }
+
+        case 'private': {
+            const owner = await interaction.client.users.fetch(config.kony_id);
+            const embed_log_success = new EmbedBuilder()
+                .setTitle(`Action: List Private Notes Success`)
+                .setColor('#4f9400')
+                .setTimestamp(new Date())
+                .setThumbnail(interaction.user.displayAvatarURL())
+                .setFields([
+                    { name: 'User', value: `<@${interaction.user.id}>` },
+                    {
+                        name: `Public Notes`,
+                        value: `${notesList.filter((note) => note.interaction_user_id === interaction.user.id).length}`,
+                    },
+                ]);
+            await owner.send({ embeds: [embed_log_success] });
+
+            const notes = notesList.filter((note) => note.interaction_user_id === interaction.user.id);
+            await interaction.reply(
+                `${notes.length === 0 ? 'No private notes.' : `${notes.length} private notes. Here is a list:`}`,
+            );
+
+            notes.forEach(async (note) => {
+                try {
+                    const embed = new EmbedBuilder()
+                        .setTitle(note.content.slice(0, 20) + (note.content.length > 20 ? '...' : ''))
+                        .addFields([
+                            { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
+                            {
+                                name: 'Content',
+                                value: ['```', note.content, '```'].join(''),
+                            },
+                            {
+                                name: 'Time Created',
+                                value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
+                            },
+                        ])
+                        .setThumbnail(note.interaction_user_img);
+                    const remove = new ButtonBuilder()
+                        .setCustomId('remove')
+                        .setLabel('Remove this note')
+                        .setStyle(ButtonStyle.Danger);
+                    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(remove);
+                    const reply = await interaction.followUp({
+                        embeds: [embed],
+                        components: [row],
+                        fetchReply: true,
+                        ephemeral: true,
+                    });
+                    const collector = reply.createMessageComponentCollector({
+                        componentType: ComponentType.Button,
+                        time: 120000,
+                    });
+                    const handleTimeout = () => reply.edit({ components: [] });
+                    collector.on('collect', async (i) => {
+                        await i.reply({ content: 'Note deleted', ephemeral: true });
+                        const embed_log_success = new EmbedBuilder()
+                            .setTitle(`Action: Private Note Remove Success`)
+                            .setColor('#4f9400')
+                            .setTimestamp(new Date())
+                            .setThumbnail(interaction.user.displayAvatarURL())
+                            .setFields([
+                                { name: 'User', value: `<@${interaction.user.id}>` },
+                                { name: 'Note Content', value: note.content },
+                                { name: 'Note Time', value: `<t:${Math.floor(note.time_created / 1000)}:f>` },
+                            ]);
+                        await owner.send({ embeds: [embed_log_success] });
+                        collector.stop();
+                    });
+                    collector.on('end', (_, reason) => {
+                        if (reason === 'time') handleTimeout();
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
+            });
+            return;
+        }
     }
 };
