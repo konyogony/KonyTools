@@ -1,11 +1,11 @@
 export interface IReminder {
     interaction_user_id: string;
     interaction_user_img: string;
-    content: string;
-    time: number;
-    timezone: string;
+    reminder_content: string;
+    reminder_time: number;
+    reminder_timezone: string;
     time_created: number;
-    user_mention_id: string;
+    reminder_user_mention_id: string;
 }
 
 export interface INote {

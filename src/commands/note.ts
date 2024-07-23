@@ -25,7 +25,7 @@ export const options = new SlashCommandBuilder()
             .setName('view')
             .setDescription('View all/your notes')
             .addSubcommand((sc) => sc.setName('all').setDescription('View all notes'))
-            .addSubcommand((sc) => sc.setName('your').setDescription('View your notes')),
+            .addSubcommand((sc) => sc.setName('yours').setDescription('View your notes')),
     )
     .toJSON();
 
@@ -149,7 +149,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             return;
         }
 
-        case 'your': {
+        case 'yours': {
             const notes = notesList.filter((note) => note.interaction_user_id === interaction.user.id);
 
             const embed_log_success = new EmbedBuilder()

@@ -38,16 +38,16 @@ export const options = new SlashCommandBuilder()
     .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
+    const owner = await interaction.client.users.fetch(config.kony_id);
+
     switch (interaction.options.getSubcommand()) {
         case 'create': {
             const reminderContent = interaction.options.getString('reminder', true);
             const reminderTimeStr = interaction.options.getString('time', true).toLowerCase();
             const selectedTimezone = interaction.options.getString('timezone', true);
             const targetUser = interaction.options.getUser('user', true);
-
-            const owner = await interaction.client.users.fetch(config.kony_id);
-
             const timeFormatRegex = /^\d{1,2} [A-Za-z]+ \d{2}:\d{2}$/;
+
             if (!timeFormatRegex.test(reminderTimeStr)) {
                 const embed_log_fail_format = new EmbedBuilder()
                     .setTitle('Action: Reminder Invalid Time')
@@ -67,8 +67,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     ephemeral: true,
                 });
             }
-            const utcNow = new Date().getTime();
 
+            const utcNow = new Date().getTime();
             const [day, monthName, time] = reminderTimeStr.split(' ');
             const [hours, minutes] = time.split(':');
 
@@ -88,10 +88,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             };
 
             const month = monthMap[monthName];
-
             const timezone = timezones.find((tz) => tz.name === selectedTimezone);
             const offset = timezone ? timezone.value : 0;
-
             const localDate = new Date(
                 Date.UTC(2024, month, parseInt(day, 10), parseInt(hours, 10) - offset, parseInt(minutes, 10)),
             );
@@ -125,16 +123,27 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 interaction_user_id: interaction.user.id,
                 interaction_user_img: interaction.user.displayAvatarURL(),
                 time_created: utcNow,
-                content: reminderContent,
-                time: utcReminder,
-                timezone: selectedTimezone,
-                user_mention_id: targetUser.id,
+                reminder_content: reminderContent,
+                reminder_time: utcReminder,
+                reminder_timezone: selectedTimezone,
+                reminder_user_mention_id: targetUser.id,
             };
 
             reminderList.push(reminderToPush);
 
             setTimeout(async () => {
                 try {
+                    const reminderIndex = reminderList.findIndex((reminderFound) => reminderToPush === reminderFound);
+                    if (reminderIndex !== -1) reminderList.splice(reminderIndex, 1);
+
+                    const embed_success_send = new EmbedBuilder()
+                        .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
+                        .setDescription(
+                            `<@${targetUser.id}>, your reminder, ` + ['```', reminderContent, '```'].join(''),
+                        );
+                    const reciever = await interaction.client.users.fetch(reminderToPush.reminder_user_mention_id);
+                    await reciever.send({ embeds: [embed_success_send] });
+
                     const embed_log_success_send = new EmbedBuilder()
                         .setTitle('Action: Reminder Sent')
                         .setColor('#4f9400')
@@ -147,15 +156,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             { name: 'Reminder Timezone', value: `${selectedTimezone}` },
                             { name: 'Reminder mention', value: `<@${targetUser.id}>` },
                         ]);
-                    await owner.send({ embeds: [embed_log_success_send] });
-
-                    const reminderIndex = reminderList.findIndex((reminderFound) => reminderToPush === reminderFound);
-                    if (reminderIndex !== -1) reminderList.splice(reminderIndex, 1);
-
-                    const embed_success_send = new EmbedBuilder()
-                        .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
-                        .setDescription(`<@${targetUser.id}>, your reminder, \n \`\`\`${reminderContent}\`\`\``);
-                    return await interaction.followUp({ embeds: [embed_success_send] });
+                    return await owner.send({ embeds: [embed_log_success_send] });
                 } catch (e) {
                     const embed_log_fail_send = new EmbedBuilder()
                         .setTitle('Action: Reminder Sent Failure')
@@ -204,7 +205,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         }
 
         case 'view': {
-            const owner = await interaction.client.users.fetch(config.kony_id);
             const embed_log_success = new EmbedBuilder()
                 .setTitle(`Action: View Reminders Success`)
                 .setColor('#4f9400')
@@ -221,13 +221,16 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             await owner.send({ embeds: [embed_log_success] });
 
             await interaction.reply(
-                `${reminderList.length === 0 ? 'No' : reminderList.length} reminder${reminderList.length > 1 ? 's' : ''} active right now. ${reminderList.length !== 0 ? 'Here is a list:' : ''}`,
+                `${reminderList.length === 0 ? 'No reminders found.' : `${reminderList.length} reminders found. Here is a list:`}`,
             );
 
             reminderList.forEach(async (reminder) => {
                 const embed = new EmbedBuilder()
-                    .setTitle(reminder.content.slice(0, 20) + (reminder.content.length > 20 ? '...' : ''))
-                    .setTimestamp(new Date())
+                    .setTitle(
+                        reminder.reminder_content.slice(0, 20) + (reminder.reminder_content.length > 20 ? '...' : ''),
+                    )
+                    .setColor('#4f9400')
+                    .setTimestamp(reminder.time_created / 1000)
                     .addFields([
                         {
                             name: 'Author',
@@ -235,19 +238,15 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         },
                         {
                             name: 'Content',
-                            value: `\`\`\`${reminder.content}\`\`\``,
-                        },
-                        {
-                            name: 'Time Created',
-                            value: `<t:${Math.floor(reminder.time_created / 1000)}:f>`,
+                            value: ['```', reminder.reminder_content, '```'].join(''),
                         },
                         {
                             name: 'Time',
-                            value: `<t:${Math.floor(reminder.time / 1000)}:f>`,
+                            value: `<t:${Math.floor(reminder.reminder_time / 1000)}:f>`,
                         },
                         {
                             name: 'Mention User',
-                            value: `User that is going to be mentioned is <@${reminder.user_mention_id}>`,
+                            value: `User that is going to be mentioned is <@${reminder.reminder_user_mention_id}>`,
                         },
                     ])
                     .setThumbnail(reminder.interaction_user_img);
