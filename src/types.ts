@@ -12,7 +12,6 @@ export interface INote {
     interaction_user_id: string;
     interaction_user_img: string;
     time_created: number;
-    public: boolean;
     content: string;
 }
 
