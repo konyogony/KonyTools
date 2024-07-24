@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { type ColorResolvable } from 'discord.js';
+import type { ColorResolvable } from 'discord.js';
 import config from './config';
 
 const faceitApi = axios.create({

@@ -1,4 +1,3 @@
-import type { INote, IReminder } from './types';
+import type { IReminder } from './types';
 
 export const reminderList: IReminder[] = [];
-export const notesList: INote[] = [];

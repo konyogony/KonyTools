@@ -2,14 +2,17 @@
     "name": "kony_ds_tools",
     "type": "module",
     "devDependencies": {
+        "@tsconfig/node18-strictest": "^1.0.0",
         "@types/bun": "latest",
         "@types/dotenv": "^8.2.0",
         "@types/node": "^20.14.9"
     },
     "dependencies": {
+        "@typegoose/typegoose": "^10.5.0",
         "axios": "^1.7.2",
         "discord.js": "^14.15.3",
         "dotenv": "^16.4.5",
+        "mongoose": "^6.12.0",
         "prettier": "^3.3.2",
         "typescript": "^5.5.3"
     },

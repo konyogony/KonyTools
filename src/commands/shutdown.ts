@@ -85,6 +85,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             type: ActivityType.Custom,
             state: '',
         });
+
+        return;
     }, 5000);
 
     return await interaction.reply(`Shutdown is set for <t:${Math.floor(shutdownTime / 1000)}:f>`);

@@ -7,9 +7,8 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from 'discord.js';
-import { notesList } from '../storage';
 import config from '../utils/config';
-import type { INote } from '../types';
+import { Note, type NoteSchema } from '../database';
 
 export const options = new SlashCommandBuilder()
     .setName('note')
@@ -35,23 +34,20 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         case 'create': {
             const content = interaction.options.getString('content', true);
 
-            const note: INote = {
-                interaction_user_id: interaction.user.id,
-                interaction_user_img: interaction.user.displayAvatarURL(),
+            await Note.create({
+                user_id: interaction.user.id,
                 time_created: Date.now(),
                 content: content,
-            };
-
-            notesList.push(note);
+            });
 
             const embed_log_success = new EmbedBuilder()
                 .setTitle('Action: Note Created')
                 .setColor(0x4f9400)
                 .setTimestamp(new Date())
-                .setThumbnail(note.interaction_user_img)
+                .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
-                    { name: 'User', value: `<@${note.interaction_user_id}>` },
-                    { name: 'Content', value: `${note.content}` },
+                    { name: 'User', value: `<@${interaction.user.id}>` },
+                    { name: 'Content', value: content },
                 ]);
             await owner.send({ embeds: [embed_log_success] });
 
@@ -59,50 +55,43 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setTitle('Note created!')
                 .setColor(0x4f9400)
                 .setTimestamp(new Date())
-                .setThumbnail(note.interaction_user_img)
-                .setFields([{ name: 'Content', value: `${note.content}` }]);
+                .setThumbnail(interaction.user.displayAvatarURL())
+                .setFields([{ name: 'Content', value: content }]);
 
             return await interaction.reply({ embeds: [embed_success_create] });
         }
         default: {
-            let notes: INote[];
+            const notes =
+                interaction.options.getSubcommand() === 'all'
+                    ? await Note.find()
+                    : await Note.find({ interaction_user_id: interaction.user.id });
 
-            if (interaction.options.getSubcommand() === 'all') {
-                notes = notesList;
-            } else {
-                notes = notesList.filter((note) => note.interaction_user_id === interaction.user.id);
-            }
-
-            if (notes.length === 0) {
-                return await interaction.reply({ content: 'No notes found.' });
-            }
+            if (notes.length === 0) return await interaction.reply({ content: 'No notes found.' });
 
             let activeIndex = 0;
             let note = notes[activeIndex];
+            if (!note) return;
 
             const removeButton = new ButtonBuilder().setCustomId('remove').setLabel('🗑️').setStyle(ButtonStyle.Danger);
             const leftButton = new ButtonBuilder().setCustomId('left').setLabel('⬅️').setStyle(ButtonStyle.Secondary);
             const rightButton = new ButtonBuilder().setCustomId('right').setLabel('➡️').setStyle(ButtonStyle.Secondary);
 
-            const generateEmbed = (note: INote) =>
-                new EmbedBuilder()
+            const generateEmbed = async (note: NoteSchema) => {
+                const user = await interaction.client.users.fetch(note.user_id);
+
+                return new EmbedBuilder()
                     .setTitle(note.content.slice(0, 20) + (note.content.length > 20 ? '...' : ''))
                     .addFields([
-                        { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
-                        {
-                            name: 'Content',
-                            value: ['```', note.content, '```'].join(''),
-                        },
-                        {
-                            name: 'Time Created',
-                            value: `<t:${Math.floor(note.time_created / 1000)}:f>`,
-                        },
+                        { name: 'Author', value: `The author of this note is <@${user.id}>` },
+                        { name: 'Content', value: ['```', note.content, '```'].join('') },
                     ])
-                    .setThumbnail(note.interaction_user_img);
+                    .setThumbnail(user.displayAvatarURL())
+                    .setTimestamp(Math.floor(note.time_created / 1000));
+            };
 
             const reply = await interaction.reply({
-                content: `${notes.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + notes.length : ''}`,
-                embeds: [generateEmbed(note)],
+                ...(notes.length > 1 && { content: `Page ${activeIndex + 1} of ${notes.length}` }),
+                embeds: [await generateEmbed(note)],
                 components: [
                     new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, removeButton, rightButton),
                 ],
@@ -116,10 +105,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
-                    {
-                        name: `Note count`,
-                        value: `${notes.length}`,
-                    },
+                    { name: `Note count`, value: `${notes.length}` },
                 ]);
             await owner.send({ embeds: [embed_log_success] });
 
@@ -131,9 +117,10 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             collector.on('collect', async (i) => {
                 switch (i.customId) {
                     case 'remove': {
-                        if (note.interaction_user_id === i.user.id) {
-                            const noteIndex = notes.findIndex((noteFound) => noteFound === note);
-                            if (noteIndex !== -1) notes.splice(noteIndex, 1);
+                        if (!note) return;
+
+                        if (note.user_id === i.user.id) {
+                            Note.remove(note.id); // no idea if work
                             await i.reply({ content: 'Note deleted', ephemeral: true });
 
                             const embed_log_success = new EmbedBuilder()
@@ -163,9 +150,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                                 .setTimestamp(new Date())
                                 .setThumbnail(interaction.user.displayAvatarURL())
                                 .setFields([
-                                    { name: 'User', value: `<@${interaction.user.id}>` },
+                                    { name: 'Author', value: `<@${note.user_id}>`, inline: true },
+                                    { name: 'User', value: `<@${interaction.user.id}>`, inline: true },
                                     { name: 'Note Content', value: note.content },
-                                    { name: 'Author', value: `<@${note.interaction_user_id}>` },
                                 ]);
                             await owner.send({ embeds: [embed_log_fail] });
                             await i.reply({ content: 'You are not the author of this note', ephemeral: true });
@@ -184,9 +171,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     }
                 }
 
-                await i.update({
-                    content: `${notes.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + notes.length : ''}`,
-                    embeds: [generateEmbed(note)],
+                if (!note) return;
+
+                await interaction.editReply({
+                    ...(notes.length > 1 && { content: `Page ${activeIndex + 1} of ${notes.length}` }),
+                    embeds: [await generateEmbed(note)],
                     components: [
                         new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, removeButton, rightButton),
                     ],

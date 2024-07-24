@@ -7,9 +7,9 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from 'discord.js';
-import { reminderList } from '../storage';
-import config from '../utils/config';
-import type { IReminder } from '../types';
+import { reminderList } from './src/storage';
+import config from './src/utils/config';
+import type { IReminder } from './src/types';
 
 const timezones = [
     { name: 'Thailand', value: 7 },

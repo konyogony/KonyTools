@@ -2,15 +2,17 @@ import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
 import * as dotenv from 'dotenv';
 import { readdirSync } from 'node:fs';
 import config from './utils/config';
+import { connection } from './database';
 
 dotenv.config();
 
-export const client = new Client({
+const client = new Client({
     intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
 });
 
 client.once('ready', async () => {
     if (!client.user) return;
+
     console.log(`Logged in as ${client.user.tag}!`);
     client.user.setActivity({
         name: `Bot ready for use!`,
@@ -32,4 +34,9 @@ for (const filename of eventFiles) {
 
 client.on('error', console.error);
 
-client.login(config.token).catch((err) => console.error('Login error:', err));
+connection
+    .then(() => client.login(config.token))
+    .catch((e: any) => {
+        console.error(e);
+        process.exit();
+    });
