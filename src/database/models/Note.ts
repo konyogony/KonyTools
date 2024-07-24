@@ -3,8 +3,8 @@ import { DocumentType, getModelForClass, modelOptions, prop, Severity } from '@t
 @modelOptions({ schemaOptions: { collection: 'notes' }, options: { allowMixed: Severity.ALLOW } })
 export class NoteSchema {
     @prop({ type: String, required: true }) user_id!: string;
-    @prop({ type: Number, required: true }) time_created!: number;
     @prop({ type: String, required: true }) content!: string;
+    @prop({ type: Number, required: true }) time_created!: number;
 }
 
 export type NoteDocument = DocumentType<NoteSchema>;

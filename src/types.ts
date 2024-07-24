@@ -1,20 +1,3 @@
-export interface IReminder {
-    interaction_user_id: string;
-    interaction_user_img: string;
-    reminder_content: string;
-    reminder_time: number;
-    reminder_timezone: string;
-    time_created: number;
-    reminder_user_mention_id: string;
-}
-
-export interface INote {
-    interaction_user_id: string;
-    interaction_user_img: string;
-    time_created: number;
-    content: string;
-}
-
 interface Faction {
     team_id: string;
     nickname: string;

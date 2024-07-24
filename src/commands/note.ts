@@ -36,8 +36,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
             await Note.create({
                 user_id: interaction.user.id,
-                time_created: Date.now(),
                 content: content,
+                time_created: Date.now(),
             });
 
             const embed_log_success = new EmbedBuilder()
