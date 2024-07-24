@@ -60,7 +60,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
             return await interaction.reply({ embeds: [embed_success_create] });
         }
-        default: {
+        case 'all':
+        case 'yours': {
             const notes =
                 interaction.options.getSubcommand() === 'all'
                     ? await Note.find()
@@ -120,6 +121,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         if (!note) return;
 
                         if (note.user_id === i.user.id) {
+                            if (!(await Note.findById(note as NoteSchema)))
+                                return await i.reply({ content: "This note doesn't exist", ephemeral: true });
+
                             await Note.deleteOne(note as NoteSchema);
                             await i.reply({ content: 'Note deleted', ephemeral: true });
 
@@ -186,10 +190,14 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         break;
                     }
                 }
+
+                return;
             });
 
             collector.on('end', (_, reason) => reason === 'time' && interaction.editReply({ components: [] }));
             return;
         }
     }
+
+    return;
 };
