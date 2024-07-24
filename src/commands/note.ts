@@ -65,7 +65,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             return await interaction.reply({ embeds: [embed_success_create] });
         }
         default: {
-            let notes;
+            let notes: INote[];
 
             if (interaction.options.getSubcommand() === 'all') {
                 notes = notesList;
