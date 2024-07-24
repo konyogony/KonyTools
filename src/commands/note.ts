@@ -115,7 +115,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     ])
                     .setThumbnail(note.interaction_user_img);
 
-            const reply = await interaction.followUp({
+            const reply = await interaction.reply({
                 content: `${notes.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + notes.length : ''}`,
                 embeds: [generateEmbed(note)],
                 components: [
