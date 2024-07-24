@@ -1,6 +1,15 @@
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    ComponentType,
+    EmbedBuilder,
+    SlashCommandBuilder,
+} from 'discord.js';
 import { reminderList } from '../storage';
 import config from '../utils/config';
+import type { IReminder } from '../types';
 
 const timezones = [
     { name: 'Thailand', value: 7 },
@@ -138,9 +147,15 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
                     const embed_success_send = new EmbedBuilder()
                         .setTitle(`${reminderContent.slice(0, 20)}${reminderContent.length > 20 ? '...' : ''}`)
-                        .setDescription(
-                            `<@${targetUser.id}>, your reminder, ` + ['```', reminderContent, '```'].join(''),
-                        );
+                        .addFields([
+                            { name: 'Content', value: ['```', reminderContent, '```'].join('') },
+                            {
+                                name: 'Reminder Time',
+                                value: `<t:${Math.floor(reminderToPush.reminder_time / 1000)}:f>`,
+                            },
+                            { name: 'Author', value: `<@${reminderToPush.interaction_user_id}>` },
+                        ]);
+
                     const reciever = await interaction.client.users.fetch(reminderToPush.reminder_user_mention_id);
                     await reciever.send({ embeds: [embed_success_send] });
 
@@ -205,27 +220,20 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         }
 
         case 'view': {
-            const embed_log_success = new EmbedBuilder()
-                .setTitle(`Action: View Reminders Success`)
-                .setColor('#4f9400')
-                .setTimestamp(new Date())
-                .setThumbnail(interaction.user.displayAvatarURL())
-                .setFields([
-                    { name: 'User', value: `<@${interaction.user.id}>` },
-                    {
-                        name: `Reminders`,
-                        value: `${reminderList.length}`,
-                    },
-                ]);
+            const reminders = reminderList;
 
-            await owner.send({ embeds: [embed_log_success] });
+            if (reminders.length === 0) {
+                return await interaction.reply({ content: 'No reminders found.' });
+            }
 
-            await interaction.reply(
-                `${reminderList.length === 0 ? 'No reminders found.' : `${reminderList.length} reminders found. Here is a list:`}`,
-            );
+            let activeIndex = 0;
+            let reminder = reminders[activeIndex];
 
-            reminderList.forEach(async (reminder) => {
-                const embed = new EmbedBuilder()
+            const leftButton = new ButtonBuilder().setCustomId('left').setLabel('⬅️').setStyle(ButtonStyle.Secondary);
+            const rightButton = new ButtonBuilder().setCustomId('right').setLabel('➡️').setStyle(ButtonStyle.Secondary);
+
+            const generateEmbed = (reminder: IReminder) =>
+                new EmbedBuilder()
                     .setTitle(
                         reminder.reminder_content.slice(0, 20) + (reminder.reminder_content.length > 20 ? '...' : ''),
                     )
@@ -250,9 +258,41 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         },
                     ])
                     .setThumbnail(reminder.interaction_user_img);
-                await interaction.followUp({ embeds: [embed] });
+
+            const reply = await interaction.reply({
+                content: `${reminders.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + reminders.length : ''}`,
+                embeds: [generateEmbed(reminder)],
+                components: [new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, rightButton)],
+                fetchReply: true,
             });
 
+            const collector = reply.createMessageComponentCollector({
+                componentType: ComponentType.Button,
+                time: 120000,
+            });
+
+            collector.on('collect', async (i) => {
+                switch (i.customId) {
+                    case 'left': {
+                        activeIndex = activeIndex === 0 ? reminders.length - 1 : activeIndex - 1;
+                        reminder = reminders[activeIndex];
+                        break;
+                    }
+                    case 'right': {
+                        activeIndex = activeIndex === reminders.length - 1 ? 0 : activeIndex + 1;
+                        reminder = reminders[activeIndex];
+                        break;
+                    }
+                }
+
+                await i.update({
+                    content: `${reminders.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + reminders.length : ''}`,
+                    embeds: [generateEmbed(reminder)],
+                    components: [new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, rightButton)],
+                });
+            });
+
+            collector.on('end', (_, reason) => reason === 'time' && reply.edit({ components: [] }));
             return;
         }
     }
