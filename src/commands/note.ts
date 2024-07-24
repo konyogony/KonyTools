@@ -120,7 +120,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         if (!note) return;
 
                         if (note.user_id === i.user.id) {
-                            Note.remove(note.id); // no idea if work
+                            Note.deleteOne(note.id);
                             await i.reply({ content: 'Note deleted', ephemeral: true });
 
                             const embed_log_success = new EmbedBuilder()
