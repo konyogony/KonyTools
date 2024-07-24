@@ -81,12 +81,26 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 ]);
             await owner.send({ embeds: [embed_log_success] });
 
-            await interaction.reply(
-                `${notes.length === 0 ? 'No notes found.' : `${notes.length} notes found. Here is a list:`}`,
-            );
+            let activeIndex = 0;
+            let note = notes[activeIndex];
 
-            notes.forEach(async (note) => {
-                const embed_success_list = new EmbedBuilder()
+            const removeButton = new ButtonBuilder()
+                .setCustomId('remove')
+                .setLabel('Remove this note')
+                .setStyle(ButtonStyle.Danger);
+
+            const leftButton = new ButtonBuilder()
+                .setCustomId('left')
+                .setLabel('Previous')
+                .setStyle(ButtonStyle.Secondary);
+
+            const rightButton = new ButtonBuilder()
+                .setCustomId('right')
+                .setLabel('Next')
+                .setStyle(ButtonStyle.Secondary);
+
+            const generateEmbed = (note: INote) =>
+                new EmbedBuilder()
                     .setTitle(note.content.slice(0, 20) + (note.content.length > 20 ? '...' : ''))
                     .addFields([
                         { name: 'Author', value: `The author of this note is <@${note.interaction_user_id}>` },
@@ -101,53 +115,83 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     ])
                     .setThumbnail(note.interaction_user_img);
 
-                if (note.interaction_user_id === interaction.user.id) {
-                    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                        new ButtonBuilder()
-                            .setCustomId('remove')
-                            .setLabel('Remove this note')
-                            .setStyle(ButtonStyle.Danger),
-                    );
-                    const reply = await interaction.followUp({
-                        embeds: [embed_success_list],
-                        components: [row],
-                        fetchReply: true,
-                        ephemeral: true,
-                    });
-
-                    const collector = reply.createMessageComponentCollector({
-                        componentType: ComponentType.Button,
-                        time: 120000,
-                    });
-
-                    collector.on('collect', async (i) => {
-                        const noteIndex = notes.findIndex((noteFound) => noteFound === note);
-                        if (noteIndex !== -1) notes.splice(noteIndex, 1);
-                        await i.reply({ content: 'Note deleted', ephemeral: true });
-
-                        const embed_log_success = new EmbedBuilder()
-                            .setTitle(`Action: Public Note Remove Success`)
-                            .setColor('#4f9400')
-                            .setTimestamp(new Date())
-                            .setThumbnail(interaction.user.displayAvatarURL())
-                            .setFields([
-                                { name: 'User', value: `<@${interaction.user.id}>` },
-                                { name: 'Note Content', value: note.content },
-                                { name: 'Note Time', value: `<t:${Math.floor(note.time_created / 1000)}:f>` },
-                            ]);
-
-                        await owner.send({ embeds: [embed_log_success] });
-                        collector.stop();
-                    });
-                    collector.on('end', (_, reason) => reason === 'time' && reply.edit({ components: [] }));
-                } else {
-                    await interaction.followUp({
-                        embeds: [embed_success_list],
-                        ephemeral: true,
-                    });
-                }
+            const reply = await interaction.followUp({
+                content: `${notes.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + notes.length : ''}`,
+                embeds: [generateEmbed(note)],
+                components: [
+                    new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, removeButton, rightButton),
+                ],
+                fetchReply: true,
             });
 
+            const collector = reply.createMessageComponentCollector({
+                componentType: ComponentType.Button,
+                time: 120000,
+            });
+
+            collector.on('collect', async (i) => {
+                switch (i.customId) {
+                    case 'remove': {
+                        if (note.interaction_user_id === i.user.id) {
+                            const noteIndex = notes.findIndex((noteFound) => noteFound === note);
+                            if (noteIndex !== -1) notes.splice(noteIndex, 1);
+                            await i.reply({ content: 'Note deleted', ephemeral: true });
+
+                            const embed_log_success = new EmbedBuilder()
+                                .setTitle(`Action: Note Remove Success`)
+                                .setColor('#4f9400')
+                                .setTimestamp(note.time_created)
+                                .setThumbnail(interaction.user.displayAvatarURL())
+                                .setFields([
+                                    { name: 'User', value: `<@${interaction.user.id}>` },
+                                    { name: 'Note Content', value: note.content },
+                                ]);
+
+                            await owner.send({ embeds: [embed_log_success] });
+
+                            if (notes.length === 0) {
+                                await reply.edit({ content: 'No more notes.', embeds: [], components: [] });
+                                collector.stop();
+                                return;
+                            }
+
+                            if (activeIndex >= notes.length) activeIndex = notes.length - 1;
+                            note = notes[activeIndex];
+                        } else {
+                            await i.reply({ content: 'You are not the author of this note', ephemeral: true });
+                        }
+                        break;
+                    }
+                    case 'left': {
+                        if (activeIndex === 0) {
+                            activeIndex = notes.length - 1;
+                        } else {
+                            activeIndex--;
+                        }
+                        note = notes[activeIndex];
+                        break;
+                    }
+                    case 'right': {
+                        if (activeIndex === notes.length - 1) {
+                            activeIndex = 0;
+                        } else {
+                            activeIndex++;
+                        }
+                        note = notes[activeIndex];
+                        break;
+                    }
+                }
+
+                await i.update({
+                    content: `${notes.length > 1 ? 'Page ' + (activeIndex + 1) + ' of ' + notes.length : ''}`,
+                    embeds: [generateEmbed(note)],
+                    components: [
+                        new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, removeButton, rightButton),
+                    ],
+                });
+            });
+
+            collector.on('end', (_, reason) => reason === 'time' && reply.edit({ components: [] }));
             return;
         }
 
