@@ -30,6 +30,7 @@ export const options = new SlashCommandBuilder()
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const owner = await interaction.client.users.fetch(config.kony_id);
+
     switch (interaction.options.getSubcommand()) {
         case 'create': {
             const content = interaction.options.getString('content', true);

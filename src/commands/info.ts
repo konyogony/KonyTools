@@ -1,5 +1,5 @@
 import type { IMatch } from '../types';
-import { getEloStats, getFaceitData, getSteamData } from '../utils/util';
+import { getEloStats, getFaceitData, getSteamData } from '../utils';
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
 
