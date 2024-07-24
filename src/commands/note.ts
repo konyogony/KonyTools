@@ -64,7 +64,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const notes =
                 interaction.options.getSubcommand() === 'all'
                     ? await Note.find()
-                    : await Note.find({ interaction_user_id: interaction.user.id });
+                    : await Note.find({ user_id: interaction.user.id });
 
             if (notes.length === 0) return await interaction.reply({ content: 'No notes found.' });
 
@@ -86,7 +86,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         { name: 'Content', value: ['```', note.content, '```'].join('') },
                     ])
                     .setThumbnail(user.displayAvatarURL())
-                    .setTimestamp(Math.floor(note.time_created / 1000));
+                    .setTimestamp(note.time_created);
             };
 
             const reply = await interaction.reply({
@@ -120,7 +120,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         if (!note) return;
 
                         if (note.user_id === i.user.id) {
-                            Note.deleteOne(note.id);
+                            await Note.deleteOne(note as NoteSchema);
                             await i.reply({ content: 'Note deleted', ephemeral: true });
 
                             const embed_log_success = new EmbedBuilder()
@@ -136,7 +136,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             await owner.send({ embeds: [embed_log_success] });
 
                             if (notes.length === 0) {
-                                await reply.edit({ content: 'No more notes.', embeds: [], components: [] });
+                                await interaction.editReply({ content: 'No more notes.', embeds: [], components: [] });
                                 collector.stop();
                                 return;
                             }
@@ -159,30 +159,36 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         }
                         break;
                     }
-                    case 'left': {
-                        activeIndex = activeIndex === 0 ? notes.length - 1 : activeIndex - 1;
-                        note = notes[activeIndex];
-                        break;
-                    }
+                    case 'left':
                     case 'right': {
-                        activeIndex = activeIndex === notes.length - 1 ? 0 : activeIndex + 1;
+                        activeIndex =
+                            i.customId === 'left'
+                                ? activeIndex === 0
+                                    ? notes.length - 1
+                                    : activeIndex - 1
+                                : activeIndex === notes.length - 1
+                                  ? 0
+                                  : activeIndex + 1;
                         note = notes[activeIndex];
+
+                        if (!note) return;
+                        await i.update({
+                            ...(notes.length > 1 && { content: `Page ${activeIndex + 1} of ${notes.length}` }),
+                            embeds: [await generateEmbed(note)],
+                            components: [
+                                new ActionRowBuilder<ButtonBuilder>().addComponents(
+                                    leftButton,
+                                    removeButton,
+                                    rightButton,
+                                ),
+                            ],
+                        });
                         break;
                     }
                 }
-
-                if (!note) return;
-
-                await interaction.editReply({
-                    ...(notes.length > 1 && { content: `Page ${activeIndex + 1} of ${notes.length}` }),
-                    embeds: [await generateEmbed(note)],
-                    components: [
-                        new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, removeButton, rightButton),
-                    ],
-                });
             });
 
-            collector.on('end', (_, reason) => reason === 'time' && reply.edit({ components: [] }));
+            collector.on('end', (_, reason) => reason === 'time' && interaction.editReply({ components: [] }));
             return;
         }
     }
