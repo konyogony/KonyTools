@@ -13,7 +13,8 @@ const isWinner = (match: IMatch): boolean => {
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const [faceit_data, match_data] = await getFaceitData('kony_ogony');
-    const [{ playerstats: stats }, { response: players }] = await getSteamData(faceit_data.steam_id_64);
+    console.log(faceit_data);
+    const [{ playerstats }, { response }] = await getSteamData(faceit_data.steam_id_64);
 
     interaction.client.user.setActivity({
         name: `🎮 ELO: ${faceit_data.games.cs2.faceit_elo} | LVL ${getEloStats(faceit_data.games.cs2.faceit_elo).level}`,
@@ -24,7 +25,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const activated_at = Math.floor(Date.parse(faceit_data.activated_at) / 1000);
     const winner = isWinner(match_data.items[0]);
     const hours = Math.floor(
-        stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played').value / 3600,
+        playerstats.stats.find((stat: { name: string; value: number }) => stat.name === 'total_time_played').value /
+            3600,
     );
 
     const embed_log_success = new EmbedBuilder()
@@ -40,15 +42,16 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const owner = await interaction.client.users.fetch(config.kony_id);
     await owner.send({ embeds: [embed_log_success] });
 
+    const eloStats = getEloStats(faceit_data.games.cs2.faceit_elo);
     const embed = new EmbedBuilder()
-        .setColor(getEloStats(faceit_data.elo).color)
+        .setColor(eloStats.color)
         .setTitle(faceit_data.steam_nickname)
         .setTimestamp(new Date())
         .setThumbnail(faceit_data.avatar)
         .addFields(
             {
                 name: 'Faceit Elo',
-                value: `${faceit_data.elo} (LVL ${getEloStats(faceit_data.elo).level})`,
+                value: `${faceit_data.games.cs2.faceit_elo} (LVL ${eloStats.level})`,
                 inline: true,
             },
             {
@@ -64,21 +67,23 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             },
             {
                 name: 'Joined Steam',
-                value: `[<t:${players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
+                value: `[<t:${response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             },
         )
         .addFields({
             name: `Last game: ${winner ? 'WIN' : 'LOSS'}`,
             value: `kony_ogony has ${winner ? 'won' : 'lost'} the last match`,
         });
+
     setTimeout(
         () =>
             interaction.client.user.setActivity({
-                name: `Bot ready for use! :steam_happy_pd:`,
+                name: `Bot ready for use!`,
                 type: ActivityType.Custom,
                 state: '',
             }),
         15000,
     );
+
     return await interaction.reply({ embeds: [embed] });
 };
