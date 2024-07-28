@@ -8,7 +8,7 @@
         "allowJs": false,
         "outDir": "./dist",
         "removeComments": true,
-        "noPropertyAccessFromIndexSignature": false,
+        "noUncheckedIndexedAccess": false,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "ignoreDeprecations": "5.0"
