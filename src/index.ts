@@ -1,10 +1,7 @@
 import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
-import * as dotenv from 'dotenv';
 import { readdirSync } from 'node:fs';
 import config from './utils/config';
 import { connection } from './database';
-
-dotenv.config();
 
 const client = new Client({
     intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],

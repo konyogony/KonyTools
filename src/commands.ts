@@ -1,9 +1,6 @@
 import { REST, Routes } from 'discord.js';
-import * as dotenv from 'dotenv';
 import { loadCommands } from './utils/commands';
 import config from './utils/config';
-
-dotenv.config();
 
 new REST()
     .setToken(config.token)
