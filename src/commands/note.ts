@@ -7,8 +7,8 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from 'discord.js';
-import config from '../utils/config';
 import { Note, type NoteSchema } from '../database';
+import config from '../utils/config';
 
 export const options = new SlashCommandBuilder()
     .setName('note')
@@ -37,13 +37,13 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
             await Note.create({
                 user_id: interaction.user.id,
-                content: content,
+                content,
                 time_created: Date.now(),
-            });
+            } as NoteSchema);
 
             const embed_log_success = new EmbedBuilder()
                 .setTitle('Action: Note Created')
-                .setColor(0x4f9400)
+                .setColor('#4f9400')
                 .setTimestamp(new Date())
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([
@@ -54,7 +54,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
             const embed_success_create = new EmbedBuilder()
                 .setTitle('Note created!')
-                .setColor(0x4f9400)
+                .setColor('#4f9400')
                 .setTimestamp(new Date())
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([{ name: 'Content', value: content }]);
@@ -68,7 +68,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     ? await Note.find()
                     : await Note.find({ user_id: interaction.user.id });
 
-            if (notes.length === 0) return await interaction.reply({ content: 'No notes found.' });
+            if (notes.length === 0) return await interaction.reply('No notes found.');
 
             let activeIndex = 0;
             let note = notes[activeIndex];
@@ -77,14 +77,15 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const removeButton = new ButtonBuilder().setCustomId('remove').setLabel('🗑️').setStyle(ButtonStyle.Danger);
             const leftButton = new ButtonBuilder().setCustomId('left').setLabel('⬅️').setStyle(ButtonStyle.Secondary);
             const rightButton = new ButtonBuilder().setCustomId('right').setLabel('➡️').setStyle(ButtonStyle.Secondary);
+            const components = new ActionRowBuilder<ButtonBuilder>().addComponents(removeButton);
 
             const generateEmbed = async (note: NoteSchema) => {
                 const user = await interaction.client.users.fetch(note.user_id);
 
                 return new EmbedBuilder()
                     .setTitle(note.content.slice(0, 20) + (note.content.length > 20 ? '...' : ''))
-                    .addFields([
-                        { name: 'Author', value: `The author of this note is <@${user.id}>` },
+                    .setFields([
+                        { name: 'Author', value: `<@${user.id}>` },
                         { name: 'Content', value: ['```', note.content, '```'].join('') },
                     ])
                     .setThumbnail(user.displayAvatarURL())
@@ -94,9 +95,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const reply = await interaction.reply({
                 ...(notes.length > 1 && { content: `Page ${activeIndex + 1} of ${notes.length}` }),
                 embeds: [await generateEmbed(note)],
-                components: [
-                    new ActionRowBuilder<ButtonBuilder>().addComponents(leftButton, removeButton, rightButton),
-                ],
+                ...(notes.length > 1
+                    ? { components: [components.addComponents(leftButton, rightButton)] }
+                    : { components: [components] }),
                 fetchReply: true,
             });
 
@@ -140,12 +141,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
                             await owner.send({ embeds: [embed_log_success] });
 
-                            if (notes.length === 0) {
-                                await interaction.editReply({ content: 'No more notes.', embeds: [], components: [] });
-                                collector.stop();
-                                return;
-                            }
-
                             if (activeIndex >= notes.length) activeIndex = notes.length - 1;
                             note = notes[activeIndex];
                         } else {
@@ -180,13 +175,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         await i.update({
                             ...(notes.length > 1 && { content: `Page ${activeIndex + 1} of ${notes.length}` }),
                             embeds: [await generateEmbed(note)],
-                            components: [
-                                new ActionRowBuilder<ButtonBuilder>().addComponents(
-                                    leftButton,
-                                    removeButton,
-                                    rightButton,
-                                ),
-                            ],
+                            ...(notes.length > 1
+                                ? { components: [components.addComponents(leftButton, rightButton)] }
+                                : { components: [components] }),
                         });
                         break;
                     }

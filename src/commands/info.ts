@@ -1,6 +1,6 @@
+import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import type { IMatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils';
-import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
 
 export const options = new SlashCommandBuilder().setName('info').setDescription("Get kony's latest info").toJSON();
@@ -32,7 +32,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     const embed_log_success = new EmbedBuilder()
         .setTitle('Action: Info Success')
         .setTimestamp(new Date())
-        .setColor(0x4f9400)
+        .setColor('#4f9400')
         .setThumbnail(interaction.user.displayAvatarURL())
         .setFields([
             { name: 'User', value: `<@${interaction.user.id}>` },
@@ -48,7 +48,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .setTitle(faceit_data.steam_nickname)
         .setTimestamp(new Date())
         .setThumbnail(faceit_data.avatar)
-        .addFields(
+        .setFields([
             {
                 name: 'Faceit Elo',
                 value: `${faceit_data.games.cs2.faceit_elo} (LVL ${eloStats.level})`,
@@ -59,8 +59,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 value: `${hours}h (not up to date)`,
                 inline: true,
             },
-        )
-        .addFields(
             {
                 name: `Joined Faceit`,
                 value: `[<t:${activated_at}:f>](https://faceit.com/en/players/${faceit_data.nickname})`,
@@ -69,11 +67,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 name: 'Joined Steam',
                 value: `[<t:${response.players[0].timecreated}:f>](https://steamcommunity.com/profiles/${faceit_data.steam_id_64})`,
             },
-        )
-        .addFields({
-            name: `Last game: ${winner ? 'WIN' : 'LOSS'}`,
-            value: `kony_ogony has ${winner ? 'won' : 'lost'} the last match`,
-        });
+            {
+                name: `Last game: ${winner ? 'WIN' : 'LOSS'}`,
+                value: `kony_ogony has ${winner ? 'won' : 'lost'} the last match`,
+            },
+        ]);
 
     setTimeout(
         () =>

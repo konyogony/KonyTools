@@ -1,6 +1,7 @@
 import { readdirSync } from 'node:fs';
-import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
-import { connection } from './database';
+import { ActivityType, Client, EmbedBuilder, GatewayIntentBits } from 'discord.js';
+import cron from 'node-cron';
+import { connection, Reminder, ReminderSchema } from './database';
 import config from './utils/config';
 
 const client = new Client({
@@ -37,3 +38,27 @@ connection
         console.error(e);
         process.exit();
     });
+
+cron.schedule('* * * * *', async () => {
+    const reminders = await Reminder.find({ time: Math.floor(new Date().getTime() / 1000 / 60) });
+    reminders.forEach(async (reminder) => {
+        const user = await client.users.fetch(reminder.user_id);
+        const embed = new EmbedBuilder()
+            .setTitle('Reminder')
+            .setDescription(reminder.content)
+            .setColor('#4f9400')
+            .setTimestamp(reminder.time_created);
+
+        await user.send({ embeds: [embed] }).catch(() => void 0);
+        await Reminder.deleteOne(reminder as ReminderSchema);
+    });
+
+    const old_reminders = await Reminder.find();
+    old_reminders.forEach(async (reminder) => {
+        console.log(reminder);
+        if (Math.floor(new Date().getTime() / 1000 / 60) > reminder.time) {
+            console.log('here');
+            await reminder.delete(reminder as ReminderSchema);
+        }
+    });
+});
