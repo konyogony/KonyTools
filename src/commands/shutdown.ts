@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { ActivityType, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
-import axios from 'axios';
 
 export const options = new SlashCommandBuilder()
     .setName('shutdown')

@@ -1,6 +1,6 @@
+import { $ } from 'bun';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
-import { $ } from 'bun';
 
 export const options = new SlashCommandBuilder().setName('pull').setDescription('Get updates from GitHub').toJSON();
 

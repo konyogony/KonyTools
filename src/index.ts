@@ -1,7 +1,7 @@
-import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
 import { readdirSync } from 'node:fs';
-import config from './utils/config';
+import { ActivityType, Client, GatewayIntentBits } from 'discord.js';
 import { connection } from './database';
+import config from './utils/config';
 
 const client = new Client({
     intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
