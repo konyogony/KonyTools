@@ -131,7 +131,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             const embed_log_success = new EmbedBuilder()
                                 .setTitle(`Action: Note Remove Success`)
                                 .setColor('#4f9400')
-                                .setTimestamp(note.time_created)
+                                .setTimestamp(new Date())
                                 .setThumbnail(interaction.user.displayAvatarURL())
                                 .setFields([
                                     { name: 'User', value: `<@${interaction.user.id}>` },
