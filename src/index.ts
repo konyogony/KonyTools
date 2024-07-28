@@ -55,10 +55,7 @@ cron.schedule('* * * * *', async () => {
 
     const old_reminders = await Reminder.find();
     old_reminders.forEach(async (reminder) => {
-        console.log(reminder);
-        if (Math.floor(new Date().getTime() / 1000 / 60) > reminder.time) {
-            console.log('here');
+        if (Math.floor(new Date().getTime() / 1000 / 60) > reminder.time)
             await reminder.delete(reminder as ReminderSchema);
-        }
     });
 });
