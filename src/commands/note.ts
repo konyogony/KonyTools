@@ -53,9 +53,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             await owner.send({ embeds: [embed_log_success] });
 
             const embed_success_create = new EmbedBuilder()
-                .setTitle('Note created!')
+                .setTitle('Note created')
                 .setColor('#4f9400')
-                .setTimestamp(new Date())
                 .setThumbnail(interaction.user.displayAvatarURL())
                 .setFields([{ name: 'Content', value: content }]);
 

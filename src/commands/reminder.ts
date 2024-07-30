@@ -97,7 +97,6 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const embed_success_create = new EmbedBuilder()
                 .setTitle('Reminder created')
                 .setColor('#4f9400')
-                .setTimestamp(new Date())
                 .setFields([
                     { name: 'Content', value: content },
                     { name: 'Time', value: `<t:${reminderTime * 60}:f>` },
