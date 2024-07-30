@@ -118,13 +118,17 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             const removeButton = new ButtonBuilder().setCustomId('remove').setLabel('🗑️').setStyle(ButtonStyle.Danger);
             const leftButton = new ButtonBuilder().setCustomId('left').setLabel('⬅️').setStyle(ButtonStyle.Secondary);
             const rightButton = new ButtonBuilder().setCustomId('right').setLabel('➡️').setStyle(ButtonStyle.Secondary);
-            const components = new ActionRowBuilder<ButtonBuilder>().addComponents(removeButton);
+            const components = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                leftButton,
+                removeButton,
+                rightButton,
+            );
 
             const generateEmbed = async (reminder: ReminderSchema) => {
                 const user = await interaction.client.users.fetch(reminder.user_id);
 
                 return new EmbedBuilder()
-                    .setTitle(reminder.content.slice(0, 20) + (reminder.content.length > 20 ? '...' : ''))
+                    .setTitle(reminder.content.slice(0, 40) + (reminder.content.length > 40 ? '...' : ''))
                     .setFields([
                         { name: 'Author', value: `<@${user.id}>`, inline: true },
                         { name: 'Time', value: `<t:${reminder.time * 60}:f>`, inline: true },
@@ -138,8 +142,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 ...(reminders.length > 1 && { content: `Page ${activeIndex + 1} of ${reminders.length}` }),
                 embeds: [await generateEmbed(reminder)],
                 ...(reminders.length > 1
-                    ? { components: [components.addComponents(leftButton, rightButton)] }
-                    : { components: [components] }),
+                    ? { components: [components] }
+                    : { components: [new ActionRowBuilder<ButtonBuilder>().addComponents(removeButton)] }),
                 fetchReply: true,
             });
 
@@ -220,8 +224,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                             ...(reminders.length > 1 && { content: `Page ${activeIndex + 1} of ${reminders.length}` }),
                             embeds: [await generateEmbed(reminder)],
                             ...(reminders.length > 1
-                                ? { components: [components.addComponents(leftButton, rightButton)] }
-                                : { components: [components] }),
+                                ? { components: [components] }
+                                : { components: [new ActionRowBuilder<ButtonBuilder>().addComponents(removeButton)] }),
                         });
                         break;
                     }
