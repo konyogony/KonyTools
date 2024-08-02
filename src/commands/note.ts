@@ -18,7 +18,7 @@ export const options = new SlashCommandBuilder()
             .setName('create')
             .setDescription('Create a note')
             .addStringOption((s) => s.setName('content').setDescription('Content of the note').setRequired(true))
-            .addAttachmentOption((a) => a.setName('attachment').setDescription('Attachment').setRequired(false)),
+            .addAttachmentOption((a) => a.setName('attachment').setDescription('Attachment')),
     )
     .addSubcommandGroup((scg) =>
         scg
