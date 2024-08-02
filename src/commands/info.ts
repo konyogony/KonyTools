@@ -13,7 +13,6 @@ const isWinner = (match: IMatch): boolean => {
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const [faceit_data, match_data] = await getFaceitData('kony_ogony');
-    console.log(faceit_data);
     const [{ playerstats }, { response }] = await getSteamData(faceit_data.steam_id_64);
 
     interaction.client.user.setActivity({
