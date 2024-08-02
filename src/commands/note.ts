@@ -17,7 +17,8 @@ export const options = new SlashCommandBuilder()
         sc
             .setName('create')
             .setDescription('Create a note')
-            .addStringOption((s) => s.setName('content').setDescription('Content of the note').setRequired(true)),
+            .addStringOption((s) => s.setName('content').setDescription('Content of the note').setRequired(true))
+            .addAttachmentOption((a) => a.setName('attachment').setDescription('Attachment').setRequired(false)),
     )
     .addSubcommandGroup((scg) =>
         scg
@@ -34,11 +35,13 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     switch (interaction.options.getSubcommand()) {
         case 'create': {
             const content = interaction.options.getString('content', true);
+            const attachment = interaction.options.getAttachment('attachment');
 
             await Note.create({
                 user_id: interaction.user.id,
                 content,
                 time_created: Date.now(),
+                attachment: attachment || null,
             } as NoteSchema);
 
             const embed_log_success = new EmbedBuilder()
@@ -49,6 +52,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
                     { name: 'Content', value: content },
+                    { name: 'Attachment', value: attachment?.url || 'None' },
                 ]);
             await owner.send({ embeds: [embed_log_success] });
 
@@ -56,7 +60,10 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setTitle('Note created')
                 .setColor('#4f9400')
                 .setThumbnail(interaction.user.displayAvatarURL())
-                .setFields([{ name: 'Content', value: content }]);
+                .setFields([
+                    { name: 'Content', value: content },
+                    { name: 'Attachment', value: attachment?.url || 'None' },
+                ]);
 
             return await interaction.reply({ embeds: [embed_success_create] });
         }
@@ -90,6 +97,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     .setFields([
                         { name: 'Author', value: `<@${user.id}>` },
                         { name: 'Content', value: ['```', note.content, '```'].join('') },
+                        { name: 'Attachment', value: note.attachment?.url || 'None' },
                     ])
                     .setThumbnail(user.displayAvatarURL())
                     .setTimestamp(note.time_created);
@@ -126,10 +134,10 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                         if (!note) return;
 
                         if (note.user_id === i.user.id) {
-                            if (!(await Note.findById(note as NoteSchema)))
+                            if (!(await Note.findById(note._id)))
                                 return await i.reply({ content: "This note doesn't exist", ephemeral: true });
 
-                            await Note.deleteOne(note as NoteSchema);
+                            await Note.deleteOne({ _id: note._id });
                             await i.reply({ content: 'Note deleted', ephemeral: true });
 
                             const embed_log_success = new EmbedBuilder()
@@ -140,12 +148,19 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                                 .setFields([
                                     { name: 'User', value: `<@${interaction.user.id}>` },
                                     { name: 'Note Content', value: note.content },
+                                    { name: 'Attachment', value: note.attachment?.url || 'None' },
                                 ]);
 
                             await owner.send({ embeds: [embed_log_success] });
 
+                            notes.splice(activeIndex, 1);
                             if (activeIndex >= notes.length) activeIndex = notes.length - 1;
                             note = notes[activeIndex];
+
+                            if (notes.length === 0) {
+                                await i.message.edit({ content: 'No notes found.', embeds: [], components: [] });
+                                return;
+                            }
                         } else {
                             const embed_log_fail = new EmbedBuilder()
                                 .setTitle(`Action: Note Remove No Permission`)
@@ -156,6 +171,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                                     { name: 'Author', value: `<@${note.user_id}>`, inline: true },
                                     { name: 'User', value: `<@${interaction.user.id}>`, inline: true },
                                     { name: 'Note Content', value: note.content },
+                                    { name: 'Attachment', value: note.attachment?.url || 'None' },
                                 ]);
                             await owner.send({ embeds: [embed_log_fail] });
                             await i.reply({ content: 'You are not the author of this note', ephemeral: true });
