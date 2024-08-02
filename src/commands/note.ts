@@ -41,7 +41,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 user_id: interaction.user.id,
                 content,
                 time_created: Date.now(),
-                attachment: attachment || null,
+                ...(attachment && { attachment: attachment.url }),
             } as NoteSchema);
 
             const embed_log_success = new EmbedBuilder()
@@ -52,18 +52,16 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                 .setFields([
                     { name: 'User', value: `<@${interaction.user.id}>` },
                     { name: 'Content', value: content },
-                    { name: 'Attachment', value: attachment?.url || 'None' },
-                ]);
+                ])
+                .setImage(attachment?.url || null);
             await owner.send({ embeds: [embed_log_success] });
 
             const embed_success_create = new EmbedBuilder()
                 .setTitle('Note created')
                 .setColor('#4f9400')
                 .setThumbnail(interaction.user.displayAvatarURL())
-                .setFields([
-                    { name: 'Content', value: content },
-                    { name: 'Attachment', value: attachment?.url || 'None' },
-                ]);
+                .setFields([{ name: 'Content', value: content }])
+                .setImage(attachment?.url || null);
 
             return await interaction.reply({ embeds: [embed_success_create] });
         }
@@ -97,9 +95,9 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                     .setFields([
                         { name: 'Author', value: `<@${user.id}>` },
                         { name: 'Content', value: ['```', note.content, '```'].join('') },
-                        { name: 'Attachment', value: note.attachment?.url || 'None' },
                     ])
                     .setThumbnail(user.displayAvatarURL())
+                    .setImage(note.attachment)
                     .setTimestamp(note.time_created);
             };
 
@@ -148,8 +146,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                                 .setFields([
                                     { name: 'User', value: `<@${interaction.user.id}>` },
                                     { name: 'Note Content', value: note.content },
-                                    { name: 'Attachment', value: note.attachment?.url || 'None' },
-                                ]);
+                                ])
+                                .setImage(note.attachment);
 
                             await owner.send({ embeds: [embed_log_success] });
 
@@ -171,8 +169,8 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
                                     { name: 'Author', value: `<@${note.user_id}>`, inline: true },
                                     { name: 'User', value: `<@${interaction.user.id}>`, inline: true },
                                     { name: 'Note Content', value: note.content },
-                                    { name: 'Attachment', value: note.attachment?.url || 'None' },
-                                ]);
+                                ])
+                                .setImage(note.attachment);
                             await owner.send({ embeds: [embed_log_fail] });
                             await i.reply({ content: 'You are not the author of this note', ephemeral: true });
                         }
