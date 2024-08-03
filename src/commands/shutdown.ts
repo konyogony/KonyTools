@@ -5,14 +5,35 @@ import config from '../utils/config';
 export const options = new SlashCommandBuilder()
     .setName('shutdown')
     .setDescription('Set a timer to shutdown')
-    .addNumberOption((n) =>
-        n.setName('time').setDescription('In how many minutes would it shut down').setRequired(true).setMinValue(1),
+    .addSubcommand((sc) =>
+        sc
+            .setName('kony')
+            .setDescription('Set a timer to shutdown kony')
+            .addNumberOption((n) =>
+                n
+                    .setName('time')
+                    .setDescription('In how many minutes would it shut down')
+                    .setRequired(true)
+                    .setMinValue(1),
+            ),
+    )
+    .addSubcommand((sc) =>
+        sc
+            .setName('padow')
+            .setDescription('Set a timer to shutdown padow')
+            .addNumberOption((n) =>
+                n
+                    .setName('time')
+                    .setDescription('In how many minutes would it shut down')
+                    .setRequired(true)
+                    .setMinValue(1),
+            ),
     )
     .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const time = interaction.options.getNumber('time', true);
-
+    const who = interaction.options.getSubcommand();
     const owner = await interaction.client.users.fetch(config.kony_id);
 
     if (![config.kony_id, '684472142804549637'].includes(interaction.user.id)) {
@@ -30,12 +51,16 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     }
 
     try {
-        await axios.post('https://quietly-nice-bull.ngrok-free.app/shutdown', `${time}`, {
-            headers: {
-                Authorization: `Bearer ${config.bearer_token}`,
-                'Content-Type': 'text/plain',
+        await axios.post(
+            `https://${who === 'kony' ? 'quietly-nice-bull' : 'arriving-fairly-dodo'}.ngrok-free.app/shutdown`,
+            `${time}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${config.bearer_token}`,
+                    'Content-Type': 'text/plain',
+                },
             },
-        });
+        );
     } catch (error) {
         console.log(error);
         return await interaction.reply('An error occured, check the console');
