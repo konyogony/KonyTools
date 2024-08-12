@@ -56,6 +56,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         m: 'ь',
         ',': 'б',
         '.': 'ю',
+        ' ': ' ',
     };
     const russianToEnglish: LanguageMap = Object.fromEntries(
         Object.entries(englishToRussian).map(([en, ru]) => [ru, en]),
