@@ -8,7 +8,7 @@ export const options = new ContextMenuCommandBuilder()
 export const run = async (interaction: MessageContextMenuCommandInteraction<'cached'>) => {
     if (interaction.commandType !== ApplicationCommandType.Message) return;
     const wtfmsg = interaction.targetMessage;
-    console.log(1);
+    console.log(interaction.commandType);
     const unwtf: String[] = [];
     type LanguageMap = {
         [key: string]: string;
