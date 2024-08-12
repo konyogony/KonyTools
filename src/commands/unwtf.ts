@@ -1,13 +1,13 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { ApplicationCommandType, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction } from 'discord.js';
 
-export const options = new SlashCommandBuilder()
-    .setName('unwtf')
-    .setDescription('Unwtf English -> Russian')
-    .addStringOption((o) => o.setName('content').setDescription('Content to unwtf').setRequired(true))
+export const options = new ContextMenuCommandBuilder()
+    .setName('Unwtf')
+    .setType(ApplicationCommandType.Message)
     .toJSON();
 
-export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
-    const wtfmsg = interaction.options.getString('content', true);
+export const run = async (interaction: MessageContextMenuCommandInteraction<'cached'>) => {
+    if (interaction.commandType !== ApplicationCommandType.Message) return;
+    const wtfmsg = interaction.targetMessage;
     const unwtf: String[] = [];
     type LanguageMap = {
         [key: string]: string;
@@ -47,7 +47,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         '.': 'ю',
         ' ': ' ',
     };
-    wtfmsg.split('').forEach((letter) => {
+    wtfmsg.content.split('').forEach((letter) => {
         unwtf.push(englishToRussian[letter.toLowerCase()] || letter);
     });
 
