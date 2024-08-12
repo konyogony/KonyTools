@@ -48,7 +48,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         ' ': ' ',
     };
     wtfmsg.split('').forEach((letter) => {
-        unwtf.push(englishToRussian[letter.toLowerCase()]);
+        unwtf.push(englishToRussian[letter.toLowerCase()] || letter);
     });
 
     return await interaction.reply(unwtf.join(''));
