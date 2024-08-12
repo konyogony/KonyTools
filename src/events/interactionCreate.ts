@@ -1,7 +1,7 @@
 import type { Interaction } from 'discord.js';
 
 export async function run(interaction: Interaction<'cached'>) {
-    if (!interaction.isChatInputCommand()) return;
+    if (!interaction.isChatInputCommand() && !interaction.isContextMenuCommand()) return;
 
     const commandFile = await import(`../commands/${interaction.commandName}`);
 
