@@ -1,7 +1,7 @@
 import { ApplicationCommandType, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction } from 'discord.js';
 
 export const options = new ContextMenuCommandBuilder()
-    .setName('unwtf_rus_to_en')
+    .setName('unwtf_ru_to_en')
     .setType(ApplicationCommandType.Message)
     .toJSON();
 
