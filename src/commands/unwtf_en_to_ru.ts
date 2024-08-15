@@ -7,12 +7,8 @@ export const options = new ContextMenuCommandBuilder()
 
 export const run = async (interaction: MessageContextMenuCommandInteraction<'cached'>) => {
     if (interaction.commandType !== ApplicationCommandType.Message) return;
-    const wtfmsg = interaction.targetMessage;
-    const unwtf: string[] = [];
-    type LanguageMap = {
-        [key: string]: string;
-    };
-    const englishToRussian: LanguageMap = {
+
+    const englishToRussian: { [key: string]: string } = {
         q: 'й',
         Q: 'Й',
         w: 'ц',
@@ -80,8 +76,10 @@ export const run = async (interaction: MessageContextMenuCommandInteraction<'cac
         ' ': ' ',
     };
 
-    wtfmsg.content.split('').forEach((letter) => {
-        unwtf.push(englishToRussian[letter] || letter);
-    });
-    return await interaction.reply(unwtf.join(''));
+    return await interaction.reply(
+        interaction.targetMessage.content
+            .split('')
+            .map((letter) => englishToRussian[letter] || letter)
+            .join(''),
+    );
 };
