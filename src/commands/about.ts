@@ -17,7 +17,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
     await owner.send({ embeds: [embed_log_success] });
 
     const embed = new EmbedBuilder()
-        .setColor('#14484b')
+        .setColor('#fcd301')
         .setTitle('About kony_ogony')
         .setTimestamp(new Date())
         .setThumbnail(
@@ -40,11 +40,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             },
             {
                 name: 'Discord Server',
-                value: 'You can join my [discord server](https://discord.gg/fPW9EFFU) to for further support and community news',
-            },
-            {
-                name: 'Contributors',
-                value: 'Big shoutout to [PadowYT2](https://padow.ru) for helping me and making everything possible',
+                value: 'You can join my [discord server](https://discord.gg/fPW9EFFU) to for further support and community news. By the way big shoutout to [PadowYT2](https://padow.ru) for helping me to make everything possible',
             },
         ]);
 
