@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { ColorResolvable } from 'discord.js';
+import { IGitUser } from '../types';
 import config from './config';
 
 const faceitApi = axios.create({
@@ -82,4 +83,12 @@ export const timeSince = (timestamp: number): string => {
         return `${hours}:${displayMinutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
 
     return `${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`;
+};
+
+export const getGithubData = async (username: string): Promise<IGitUser> => {
+    const github_data = await axios
+        .get(`https://api.github.com/users/${username}`)
+        .then(({ data }) => data)
+        .catch((error) => console.log(error));
+    return github_data;
 };
