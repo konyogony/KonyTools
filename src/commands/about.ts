@@ -26,11 +26,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .setFields([
             {
                 name: 'About me',
-                value: 'Hey there! Im kony_ogony, a junior fullstack dev, making cool open-source stuff for myself and others :0',
+                value: "Hey there! I'm kony_ogony, a junior fullstack dev, making cool open-source stuff for myself and others :0",
             },
             {
-                name: 'Github',
-                value: `Checkout my cool [github account](https://github.com/kony-ogony) which currently has ${git_data.public_repos} public repos and its been up since <t:${new Date(git_data.created_at).getTime() / 1000}:f> !`,
+                name: 'GitHub',
+                value: `Checkout my cool [GitHub account](https://github.com/kony-ogony) which currently has ${git_data.public_repos} public repos and it's been up since <t:${new Date(git_data.created_at).getTime() / 1000}:f> !`,
                 inline: true,
             },
             {
@@ -40,12 +40,11 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             },
             {
                 name: 'Discord Server',
-                value: 'You can join my discord server to for further support and community news at https://discord.gg/fPW9EFFU.',
-                inline: true,
+                value: 'You can join my [discord server](https://discord.gg/fPW9EFFU) to for further support and community news',
             },
             {
                 name: 'Contributors',
-                value: 'Big shoutout to [PadowYT2](https:://github.com/PadowYT2) for helping me and making everything possible',
+                value: 'Big shoutout to [PadowYT2](https://padow.ru) for helping me and making everything possible',
             },
         ]);
 
