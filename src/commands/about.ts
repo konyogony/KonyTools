@@ -35,7 +35,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             },
             {
                 name: 'Website',
-                value: 'Currently developing own website at https://konyogony.dev, it will be up soon with lots of cool features! :D',
+                value: 'Currently developing own website https://konyogony.dev, it will be up soon with lots of cool features! :D',
                 inline: true,
             },
             {
