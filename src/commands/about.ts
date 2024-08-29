@@ -30,7 +30,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
             },
             {
                 name: 'Github',
-                value: `Checkout my cool [github account](https://github.com/kony-ogony) which currently has ${git_data.public_repos} public repos and its been up since <t:${git_data.created_at.getSeconds()}:f> !`,
+                value: `Checkout my cool [github account](https://github.com/kony-ogony) which currently has ${git_data.public_repos} public repos and its been up since <t:${new Date(git_data.created_at).getTime() / 1000}:f> !`,
                 inline: true,
             },
             {
