@@ -5,7 +5,7 @@ import config from '../utils/config';
 export const options = new SlashCommandBuilder().setName('about').setDescription('About kony_ogony').toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
-    const git_data = await getGithubData('kony-ogony');
+    const git_data = await getGithubData('konyogony');
 
     const embed_log_success = new EmbedBuilder()
         .setTitle('Action: About Success')
