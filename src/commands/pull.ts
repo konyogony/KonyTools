@@ -20,7 +20,7 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
 
     try {
         const command =
-            await $`git pull https://kony-ogony:${config.github_token}@github.com/konyogony/KonyTools.git`.text();
+            await $`git pull https://konyogony:${config.github_token}@github.com/konyogony/KonyTools.git`.text();
 
         if (command.includes('Already up to date.')) return await interaction.reply('Already up to date.');
 
