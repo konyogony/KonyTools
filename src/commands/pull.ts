@@ -2,7 +2,12 @@ import { $ } from 'bun';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import config from '../utils/config';
 
-export const options = new SlashCommandBuilder().setName('pull').setDescription('Get updates from GitHub').toJSON();
+export const options = new SlashCommandBuilder()
+    .setName('pull')
+    .setDescription('Get updates from GitHub')
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
+    .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const owner = await interaction.client.users.fetch(config.kony_id);

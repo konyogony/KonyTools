@@ -27,6 +27,8 @@ export const options = new SlashCommandBuilder()
             .addSubcommand((sc) => sc.setName('all').setDescription('View all notes'))
             .addSubcommand((sc) => sc.setName('yours').setDescription('View your notes')),
     )
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
     .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {

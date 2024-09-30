@@ -3,7 +3,12 @@ import type { IMatch } from '../types';
 import { getEloStats, getFaceitData, getSteamData } from '../utils';
 import config from '../utils/config';
 
-export const options = new SlashCommandBuilder().setName('faceit').setDescription("Get kony's latest info").toJSON();
+export const options = new SlashCommandBuilder()
+    .setName('faceit')
+    .setDescription("Get kony's latest info")
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
+    .toJSON();
 
 const isWinner = (match: IMatch): boolean => {
     const faction = match.teams.faction1.players.find((u) => u.nickname === 'kony_ogony') ? 'faction1' : 'faction2';

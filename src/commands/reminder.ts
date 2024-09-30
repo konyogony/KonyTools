@@ -41,6 +41,8 @@ export const options = new SlashCommandBuilder()
             ),
     )
     .addSubcommand((sc) => sc.setName('view').setDescription('View all reminders'))
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
     .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {

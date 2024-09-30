@@ -11,7 +11,7 @@ RMB on message > apps > unwtf: Translates english gibberish to russian text
 
 Admin only: \
 `/pull` \
-`/shutdown padow/kony` 
+`/shutdown padow/kony`
 
 _More commands later!_
 

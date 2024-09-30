@@ -29,6 +29,8 @@ export const options = new SlashCommandBuilder()
                     .setMinValue(1),
             ),
     )
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
     .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {

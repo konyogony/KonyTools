@@ -3,6 +3,8 @@ import { ApplicationCommandType, ContextMenuCommandBuilder, MessageContextMenuCo
 export const options = new ContextMenuCommandBuilder()
     .setName('unwtf_en_to_ru')
     .setType(ApplicationCommandType.Message)
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
     .toJSON();
 
 export const run = async (interaction: MessageContextMenuCommandInteraction<'cached'>) => {

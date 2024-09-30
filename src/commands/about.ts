@@ -2,7 +2,12 @@ import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from '
 import { getGithubData } from '../utils';
 import config from '../utils/config';
 
-export const options = new SlashCommandBuilder().setName('about').setDescription('About kony_ogony').toJSON();
+export const options = new SlashCommandBuilder()
+    .setName('about')
+    .setDescription('About kony_ogony')
+    .setIntegrationTypes(1)
+    .setContexts(0, 1, 2)
+    .toJSON();
 
 export const run = async (interaction: ChatInputCommandInteraction<'cached'>) => {
     const git_data = await getGithubData('konyogony');
