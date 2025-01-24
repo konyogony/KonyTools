@@ -9,5 +9,5 @@ export const options = new ContextMenuCommandBuilder()
 
 export const run = async (interaction: MessageContextMenuCommandInteraction<'cached'>) => {
     if (interaction.commandType !== ApplicationCommandType.Message) return;
-    return await interaction.reply(interaction.targetMessage.content.replace('tiktok', 'tnktok'));
+    return await interaction.reply(interaction.targetMessage.content.replaceAll('tiktok', 'tnktok'));
 };
