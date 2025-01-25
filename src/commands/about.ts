@@ -31,21 +31,25 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .setFields([
             {
                 name: 'About me',
-                value: "Hey there! I'm kony_ogony, a junior fullstack dev, making cool open-source stuff for myself and others :0",
+                value: "Junior full stack dev doing cool stuff. I use Arch btw",
             },
             {
                 name: 'GitHub',
-                value: `Checkout my cool [GitHub account](https://github.com/konyogony) which currently has ${git_data.public_repos} public repos and it's been up since <t:${new Date(git_data.created_at).getTime() / 1000}:f>!`,
+                value: `Checkout my [GitHub](https://github.com/konyogony) page which currently has ${git_data.public_repos} public repos and it's been up since <t:${new Date(git_data.created_at).getTime() / 1000}:f>!`,
                 inline: true,
             },
             {
                 name: 'Website',
-                value: 'Currently developing own website https://konyogony.dev, it will be up soon with lots of cool features! :D',
+                value: 'Currently developing own website https://konyogony.dev, it will be up **soon* with lots of cool features! :D',
                 inline: true,
             },
             {
                 name: 'Discord Server',
-                value: 'You can join my [Discord server](https://discord.gg/fPW9EFFU) to for further support and community news. By the way big shoutout to [PadowYT2](https://padow.ru) for helping me to make everything possible',
+                value: 'You can join my [Discord server](https://discord.gg/BrXAHknFE6) to for further support and community news. By the way big shoutout to [PadowYT2](https://padow.ru) for helping me to make everything possible',
+            },
+            {
+                name: 'Doxium',
+                value: 'An alternative to documentation tools for Next.js. Currently under construction and on hold. Check out the [repo](https://github.com/konyogony/Doxium)'
             },
         ]);
 
