@@ -1,8 +1,11 @@
 import { readdirSync } from 'node:fs';
+import { GoogleGenAI } from '@google/genai';
 import { ActivityType, Client, EmbedBuilder, GatewayIntentBits } from 'discord.js';
 import cron from 'node-cron';
 import { connection, Reminder, ReminderSchema } from './database';
 import config from './utils/config';
+
+export const ai = new GoogleGenAI({});
 
 const client = new Client({
     intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
