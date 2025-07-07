@@ -24,7 +24,11 @@ export const run = async (interaction: MessageContextMenuCommandInteraction<'cac
 
     const owner = await interaction.client.users.fetch(config.kony_id);
 
-    if (![config.kony_id, '684472142804549637'].includes(interaction.user.id)) {
+    if (
+        ![config.kony_id, config.dan_id, config.djoh_id, config.padow_id, config.flop4ik_id].includes(
+            interaction.user.id,
+        )
+    ) {
         const embed_log_fail_permission = new EmbedBuilder()
             .setTitle('Action: Audio To Text No Permission')
             .setColor('#e32e12')
