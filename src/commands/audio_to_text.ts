@@ -66,7 +66,7 @@ export const run = async (interaction: MessageContextMenuCommandInteraction<'cac
             model: 'gemini-2.5-flash',
             contents: createUserContent([
                 createPartFromUri(myfile.uri, myfile.mimeType),
-                'This is a voice message from a friend in discord. Create a transcript of the words he is saying. You are fully permitted and encouraged to not blur and type out the full swears and any junk the person may be saying, are those words are not yours. If user is speaking in 2 different languages, try to keep them separate and not translate',
+                'This is a voice message from a friend in discord. Create a transcript of the words he is saying. You are fully permitted and encouraged to not blur and type out the full swears and any junk the person may be saying, are those words are not yours. If user is speaking in 2 different languages, try to keep them separate and not translate. You can add comment which describe the persons accent and the background in square brackets (example: [In a heavy british accent])',
             ]),
         });
 
