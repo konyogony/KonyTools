@@ -31,25 +31,21 @@ export const run = async (interaction: ChatInputCommandInteraction<'cached'>) =>
         .setFields([
             {
                 name: 'About me',
-                value: "Junior full stack dev doing cool stuff. I use Arch btw",
+                value: 'Intermediate fullstak dev. I use arch btw',
             },
             {
                 name: 'GitHub',
-                value: `Checkout my [GitHub](https://github.com/konyogony) page which currently has ${git_data.public_repos} public repos and it's been up since <t:${new Date(git_data.created_at).getTime() / 1000}:f>!`,
+                value: `Checkout [GitHub](https://github.com/konyogony)`,
                 inline: true,
             },
             {
                 name: 'Website',
-                value: 'Currently developing own website https://konyogony.dev, it will be up **soon* with lots of cool features! :D',
+                value: 'Currently working on https://hypr.konyogony.dev, it will done **soon™** :D',
                 inline: true,
             },
             {
                 name: 'Discord Server',
-                value: 'You can join my [Discord server](https://discord.gg/BrXAHknFE6) to for further support and community news. By the way big shoutout to [PadowYT2](https://padow.ru) for helping me to make everything possible',
-            },
-            {
-                name: 'Doxium',
-                value: 'An alternative to documentation tools for Next.js. Currently under construction and on hold. Check out the [repo](https://github.com/konyogony/Doxium)'
+                value: 'Join my [Discord server](https://discord.gg/BrXAHknFE6) for further support and community news.',
             },
         ]);
 
