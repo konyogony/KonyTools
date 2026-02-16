@@ -1,64 +1,38 @@
-import { readdirSync } from 'node:fs';
-import { GoogleGenAI } from '@google/genai';
-import { ActivityType, Client, EmbedBuilder, GatewayIntentBits } from 'discord.js';
-import cron from 'node-cron';
-import { connection, Reminder, ReminderSchema } from './database';
-import config from './utils/config';
-
-export const ai = new GoogleGenAI({});
+import Bun from 'bun';
+import consola from 'consola';
+import { ActivityType, Client, Events, Interaction, PresenceUpdateStatus } from 'discord.js';
 
 const client = new Client({
-    intents: [GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
+    intents: [],
+    presence: {
+        status: PresenceUpdateStatus.DoNotDisturb,
+        activities: [{ type: ActivityType.Custom, name: 'custom', state: 'Warming up...' }],
+    },
 });
 
-client.once('ready', async () => {
-    if (!client.user) return;
-
-    console.log(`Logged in as ${client.user.tag}!`);
-    client.user.setActivity({
-        name: `Bot ready for use!`,
-        type: ActivityType.Custom,
-        state: '',
-    });
+client.once(Events.ClientReady, async (client) => {
+    const application = await client.application.fetch();
+    consola.info(`Ready! Logged in as ${client.user.tag} for ${application.approximateUserInstallCount} user(s)`);
+    client.user.setPresence({ status: PresenceUpdateStatus.Online, activities: [] });
 });
 
-const eventFiles = readdirSync(`${__dirname}/events/`).filter((x) => x.endsWith('.ts'));
-for (const filename of eventFiles) {
-    const file = require(`./events/${filename}`);
-    const name = filename.split('.')[0]!;
-    if (file.once) {
-        client.once(name, file.run);
-    } else {
-        client.on(name, file.run);
+client.on(Events.InteractionCreate, async (interaction: Interaction) => {
+    if (!interaction.isChatInputCommand() && !interaction.isMessageContextMenuCommand()) return;
+
+    try {
+        const command = await import(`${import.meta.dir}/interactions/${interaction.commandName}.ts`);
+        return await command.run(interaction);
+    } catch (message) {
+        consola.error(`${message}`);
     }
-}
+});
 
-client.on('error', console.error);
+await client.login(Bun.env.DISCORD_TOKEN).catch((message) => {
+    consola.error(message);
+    process.exit();
+});
 
-connection
-    .then(() => client.login(config.token))
-    .catch((e: any) => {
-        console.error(e);
-        process.exit();
-    });
-
-cron.schedule('* * * * *', async () => {
-    const reminders = await Reminder.find({ time: Math.floor(new Date().getTime() / 1000 / 60) });
-    reminders.forEach(async (reminder) => {
-        const user = await client.users.fetch(reminder.user_id);
-        const embed = new EmbedBuilder()
-            .setTitle('Reminder')
-            .setDescription(reminder.content)
-            .setColor('#4f9400')
-            .setTimestamp(reminder.time_created);
-
-        await user.send({ embeds: [embed] }).catch(() => void 0);
-        await Reminder.deleteOne(reminder as ReminderSchema);
-    });
-
-    const old_reminders = await Reminder.find();
-    old_reminders.forEach(async (reminder) => {
-        if (Math.floor(new Date().getTime() / 1000 / 60) > reminder.time)
-            await reminder.delete(reminder as ReminderSchema);
-    });
+process.on('SIGINT', async () => {
+    await client.destroy();
+    process.exit();
 });
