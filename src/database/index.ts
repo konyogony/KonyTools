@@ -1,8 +1,9 @@
-import mongoose from 'mongoose';
-import config from '../utils/config';
+import { join } from 'node:path';
+import Bun from 'bun';
+import { drizzle } from 'drizzle-orm/bun-sqlite';
+import * as schema from '@/database/schema';
 
-export * from './models/Note';
-export * from './models/Reminder';
-
-mongoose.set('strictQuery', true);
-export const connection = mongoose.connect(config.database_uri);
+export const database = drizzle(
+    Bun.env.STATE_DIRECTORY ? join(Bun.env.STATE_DIRECTORY, 'database.sqlite') : 'database.sqlite',
+    { schema: { ...schema } },
+);

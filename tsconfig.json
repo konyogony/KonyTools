@@ -4,7 +4,6 @@
         "module": "ESNext",
         "target": "ESNext",
         "moduleResolution": "Bundler",
-        "rootDir": "./src",
         "checkJs": false,
         "allowJs": false,
         "outDir": "./dist",
@@ -12,6 +11,11 @@
         "noUncheckedIndexedAccess": false,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "ignoreDeprecations": "5.0"
-    }
+        "noPropertyAccessFromIndexSignature": false,
+        "ignoreDeprecations": "5.0",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["./src/"]
 }

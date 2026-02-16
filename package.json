@@ -1,31 +1,34 @@
 {
-    "name": "kony_ds_tools",
+    "name": "konytools",
+    "module": "src/index.ts",
     "type": "module",
-    "devDependencies": {
-        "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
-        "@tsconfig/strictest": "^2.0.5",
-        "@types/bun": "latest",
-        "@types/dotenv": "^8.2.0",
-        "@types/node": "^20.14.9",
-        "@types/node-cron": "^3.0.11"
+    "scripts": {
+        "start": "bun run src/index.ts",
+        "commands": "bun run src/commands.ts",
+        "reminders": "bun run src/reminders.ts",
+        "db:generate": "drizzle-kit generate",
+        "db:push": "drizzle-kit push"
     },
     "dependencies": {
-        "@google/genai": "^1.8.0",
+        "@discordeno/bot": "^21.0.0",
         "@resvg/resvg-js": "^2.6.2",
-        "@typegoose/typegoose": "^10.5.0",
-        "@types/uuid": "^10.0.0",
-        "axios": "^1.7.2",
-        "discord.js": "^14.16.3",
-        "dotenv": "^16.4.5",
-        "mathjax": "4",
-        "mongoose": "^8.8.0",
-        "node-cron": "^3.0.3",
-        "prettier": "^3.3.2",
-        "typescript": "^5.5.3",
-        "uuid": "^11.1.0"
+        "@tanstack/ai": "^0.5.0",
+        "@tanstack/ai-gemini": "^0.5.0",
+        "consola": "^3.4.2",
+        "convert-layout": "^0.11.1",
+        "date-fns": "^4.1.0",
+        "discord.js": "^14.25.1",
+        "drizzle-orm": "^1.0.0-beta.15",
+        "ky": "^1.14.3",
+        "mathjax": "^4.1.0"
     },
-    "scripts": {
-        "opt": "bun run src/commands.ts",
-        "dev": "bun run src/index.ts"
+    "devDependencies": {
+        "@biomejs/biome": "^2.4.0",
+        "@tsconfig/strictest": "^2.0.8",
+        "@types/bun": "^1.3.9",
+        "@types/convert-layout": "^0.5.3",
+        "@types/mathjax": "^0.0.40",
+        "drizzle-kit": "^1.0.0-beta.15",
+        "typescript": "^5.9.3"
     }
 }
