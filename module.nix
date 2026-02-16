@@ -5,6 +5,43 @@
   ...
 }: let
   cfg = config.services.konytools;
+
+  env =
+    lib.filterAttrs (_: v: v != null) {
+      CLIENT_ID = cfg.clientId;
+      DISCORD_TOKEN =
+        if cfg.discordTokenFile != null
+        then "@DISCORD_TOKEN@"
+        else null;
+      GEMINI_API_KEY =
+        if cfg.geminiKeyFile != null
+        then "@GEMINI_API_KEY@"
+        else null;
+    };
+
+  setupScript = pkgs.writeShellApplication {
+    name = "konytools-setup";
+    runtimeInputs = with pkgs; [coreutils replace-secret];
+    text = ''
+      install -Dm640 -o konytools -g konytools ${pkgs.writeText "konytools.env" (lib.generators.toKeyValue {} env)} /var/lib/konytools/.env
+
+      ${lib.optionalString (cfg.discordTokenFile != null) ''
+        replace-secret '@DISCORD_TOKEN@' ${lib.escapeShellArg cfg.discordTokenFile} /var/lib/konytools/.env
+      ''}
+
+      ${lib.optionalString (cfg.geminiKeyFile != null) ''
+        replace-secret '@GEMINI_API_KEY@' ${lib.escapeShellArg cfg.geminiKeyFile} /var/lib/konytools/.env
+      ''}
+    '';
+  };
+
+  cfgService = {
+    User = "konytools";
+    Group = "konytools";
+    WorkingDirectory = cfg.package;
+    StateDirectory = "konytools";
+    EnvironmentFile = "/var/lib/konytools/.env";
+  };
 in {
   options.services.konytools = {
     enable = lib.mkEnableOption "konytools";
@@ -32,24 +69,32 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    systemd.services.konytools-setup = {
+      description = "konytools setup";
+      requiredBy = ["konytools.service" "konytools-commands.service"];
+      before = ["konytools.service" "konytools-commands.service"];
+      restartTriggers = [cfg.package];
+
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = lib.getExe setupScript;
+        RemainAfterExit = true;
+        StateDirectory = "konytools";
+      };
+    };
+
     systemd.services.konytools = {
       description = "konytools";
       after = ["network-online.target"];
       wants = ["network-online.target"];
       wantedBy = ["multi-user.target"];
 
-      serviceConfig = {
-        ExecStart = "${cfg.package}/bin/konytools";
-        User = "konytools";
-        Group = "konytools";
-        Restart = "on-failure";
-        WorkingDirectory = cfg.package;
-        StateDirectory = "konytools";
-        Environment = "CLIENT_ID=${cfg.clientId}";
-        LoadCredential =
-          (lib.optional (cfg.discordTokenFile != null) "DISCORD_TOKEN:${cfg.discordTokenFile}")
-          ++ (lib.optional (cfg.geminiKeyFile != null) "GEMINI_API_KEY:${cfg.geminiKeyFile}");
-      };
+      serviceConfig =
+        cfgService
+        // {
+          ExecStart = "${cfg.package}/bin/konytools";
+          Restart = "on-failure";
+        };
     };
 
     systemd.services.konytools-commands = {
@@ -59,35 +104,26 @@ in {
       wantedBy = ["multi-user.target"];
       restartTriggers = [cfg.package];
 
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = "${cfg.package}/bin/konytools-commands";
-        User = "konytools";
-        Group = "konytools";
-        WorkingDirectory = cfg.package;
-        StateDirectory = "konytools";
-        Environment = "CLIENT_ID=${cfg.clientId}";
-        LoadCredential =
-          lib.optional (cfg.discordTokenFile != null) "DISCORD_TOKEN:${cfg.discordTokenFile}";
-      };
+      serviceConfig =
+        cfgService
+        // {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${cfg.package}/bin/konytools-commands";
+        };
     };
 
     systemd.services.konytools-reminders = {
       description = "konytools reminder check";
-      after = ["network-online.target"];
-      wants = ["network-online.target"];
+      after = ["network-online.target" "konytools-setup.service"];
+      wants = ["network-online.target" "konytools-setup.service"];
 
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${cfg.package}/bin/konytools-reminders";
-        User = "konytools";
-        Group = "konytools";
-        WorkingDirectory = cfg.package;
-        StateDirectory = "konytools";
-        LoadCredential =
-          lib.optional (cfg.discordTokenFile != null) "DISCORD_TOKEN:${cfg.discordTokenFile}";
-      };
+      serviceConfig =
+        cfgService
+        // {
+          Type = "oneshot";
+          ExecStart = "${cfg.package}/bin/konytools-reminders";
+        };
     };
 
     systemd.timers.konytools-reminders = {
