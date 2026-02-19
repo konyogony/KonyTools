@@ -32,6 +32,8 @@
       ${lib.optionalString (cfg.geminiKeyFile != null) ''
         replace-secret '@GEMINI_API_KEY@' ${lib.escapeShellArg cfg.geminiKeyFile} /var/lib/konytools/.env
       ''}
+
+      ${cfg.package}/bin/konytools-migrate
     '';
   };
 
@@ -71,8 +73,9 @@ in {
   config = lib.mkIf cfg.enable {
     systemd.services.konytools-setup = {
       description = "konytools setup";
-      requiredBy = ["konytools.service" "konytools-commands.service"];
-      before = ["konytools.service" "konytools-commands.service"];
+      after = ["network-online.target"];
+      wants = ["network-online.target"];
+      wantedBy = ["multi-user.target"];
       restartTriggers = [cfg.package];
 
       serviceConfig = {
@@ -85,8 +88,9 @@ in {
 
     systemd.services.konytools = {
       description = "konytools";
-      after = ["network-online.target"];
+      after = ["network-online.target" "konytools-setup.service"];
       wants = ["network-online.target"];
+      requires = ["konytools-setup.service"];
       wantedBy = ["multi-user.target"];
 
       serviceConfig =
@@ -99,8 +103,9 @@ in {
 
     systemd.services.konytools-commands = {
       description = "konytools command registration";
-      after = ["network-online.target"];
+      after = ["network-online.target" "konytools-setup.service"];
       wants = ["network-online.target"];
+      requires = ["konytools-setup.service"];
       wantedBy = ["multi-user.target"];
       restartTriggers = [cfg.package];
 
@@ -116,7 +121,8 @@ in {
     systemd.services.konytools-reminders = {
       description = "konytools reminder check";
       after = ["network-online.target" "konytools-setup.service"];
-      wants = ["network-online.target" "konytools-setup.service"];
+      wants = ["network-online.target"];
+      requires = ["konytools-setup.service"];
 
       serviceConfig =
         cfgService
