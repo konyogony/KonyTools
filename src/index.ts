@@ -1,19 +1,15 @@
 import Bun from 'bun';
 import consola from 'consola';
-import { ActivityType, Client, Events, Interaction, PresenceUpdateStatus } from 'discord.js';
+import { Client, Events, Interaction, PresenceUpdateStatus } from 'discord.js';
 
 const client = new Client({
     intents: [],
-    presence: {
-        status: PresenceUpdateStatus.DoNotDisturb,
-        activities: [{ type: ActivityType.Custom, name: 'custom', state: 'Warming up...' }],
-    },
+    presence: { status: PresenceUpdateStatus.Online },
 });
 
 client.once(Events.ClientReady, async (client) => {
     const application = await client.application.fetch();
     consola.info(`Ready! Logged in as ${client.user.tag} for ${application.approximateUserInstallCount} user(s)`);
-    client.user.setPresence({ status: PresenceUpdateStatus.Online, activities: [] });
 });
 
 client.on(Events.InteractionCreate, async (interaction: Interaction) => {
