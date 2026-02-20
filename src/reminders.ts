@@ -5,9 +5,11 @@ import { eq, lte } from 'drizzle-orm';
 import { database } from '@/database';
 import { reminders } from '@/database/schema';
 
+setTimeout(() => process.exit(1), 30 * 1000).unref();
+
 if (!Bun.env.DISCORD_TOKEN) process.exit(0);
 
-const rest = new REST().setToken(Bun.env.DISCORD_TOKEN);
+const rest = new REST({ timeout: 15 * 1000 }).setToken(Bun.env.DISCORD_TOKEN);
 
 const due = await database
     .select()
