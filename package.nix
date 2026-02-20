@@ -8,7 +8,7 @@
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "konytools";
-  version = "unstable-2026-02-16";
+  version = "unstable-2026-02-20";
 
   src = lib.cleanSource ./.;
 
