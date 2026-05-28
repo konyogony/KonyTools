@@ -6,18 +6,22 @@
 }: let
   cfg = config.services.konytools;
 
-  env =
-    lib.filterAttrs (_: v: v != null) {
-      CLIENT_ID = cfg.clientId;
-      DISCORD_TOKEN =
-        if cfg.discordTokenFile != null
-        then "@DISCORD_TOKEN@"
-        else null;
-      GEMINI_API_KEY =
-        if cfg.geminiKeyFile != null
-        then "@GEMINI_API_KEY@"
-        else null;
-    };
+  env = lib.filterAttrs (_: v: v != null) {
+    CLIENT_ID = cfg.clientId;
+    DISCORD_TOKEN =
+      if cfg.discordTokenFile != null
+      then "@DISCORD_TOKEN@"
+      else null;
+    GEMINI_API_KEY =
+      if cfg.geminiKeyFile != null
+      then "@GEMINI_API_KEY@"
+      else null;
+    CLOUDFLARE_ACCOUNT_ID = cfg.cloudflareAccountId;
+    CLOUDFLARE_API_KEY =
+      if cfg.cloudflareKeyFile != null
+      then "@CLOUDFLARE_API_KEY@"
+      else null;
+  };
 
   setupScript = pkgs.writeShellApplication {
     name = "konytools-setup";
@@ -31,6 +35,10 @@
 
       ${lib.optionalString (cfg.geminiKeyFile != null) ''
         replace-secret '@GEMINI_API_KEY@' ${lib.escapeShellArg cfg.geminiKeyFile} /var/lib/konytools/.env
+      ''}
+
+      ${lib.optionalString (cfg.cloudflareKeyFile != null) ''
+        replace-secret '@CLOUDFLARE_API_KEY@' ${lib.escapeShellArg cfg.cloudflareKeyFile} /var/lib/konytools/.env
       ''}
 
       ${cfg.package}/bin/konytools-migrate
@@ -65,6 +73,15 @@ in {
     };
 
     geminiKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+    };
+
+    cloudflareAccountId = lib.mkOption {
+      type = lib.types.str;
+    };
+
+    cloudflareKeyFile = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
     };

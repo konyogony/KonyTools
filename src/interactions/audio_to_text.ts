@@ -1,5 +1,3 @@
-import { chat } from '@tanstack/ai';
-import { createGeminiChat } from '@tanstack/ai-gemini';
 import Bun from 'bun';
 import consola from 'consola';
 import {
@@ -12,7 +10,19 @@ import {
     TextDisplayBuilder,
 } from 'discord.js';
 import ky from 'ky';
-import { admins, parseError } from '@/utils';
+import { admins } from '@/utils';
+
+const replaceWords = (value: string): string =>
+    [
+        { from: 'алло', to: 'ало' },
+        { from: 'блядь', to: 'блять' },
+    ].reduce(
+        (text, { from, to }) =>
+            text.replace(new RegExp(`(?<![\\p{L}\\p{N}])${from}(?![\\p{L}\\p{N}])`, 'giu'), (word) =>
+                word[0] === word[0].toUpperCase() ? `${to[0].toUpperCase()}${to.slice(1)}` : to,
+            ),
+        value,
+    );
 
 export const options = new ContextMenuCommandBuilder()
     .setName('audio_to_text')
@@ -50,75 +60,62 @@ export const run = async (interaction: MessageContextMenuCommandInteraction) => 
     consola.info(`audio_to_text: ${interaction.user.tag} transcribing ${audio.name}`);
     await interaction.deferReply();
 
-    try {
-        const buffer = await ky.get(audio.url).arrayBuffer();
-        const stream = chat({
-            adapter: createGeminiChat('gemini-2.5-flash', Bun.env.GEMINI_API_KEY),
-            temperature: 0.5,
-            messages: [
-                {
-                    role: 'user',
-                    content: [
-                        {
-                            type: 'audio',
-                            source: {
-                                type: 'data',
-                                value: Buffer.from(buffer).toString('base64'),
-                                mimeType: audio.contentType || 'audio/mp3',
-                            },
-                        },
-                        {
-                            type: 'text',
-                            content: [
-                                'This is a voice message from a friend in Discord. Create a precise transcript of exactly what is being said.',
-                                '\n1. **Verbatim Accuracy:** Type out full swear words, slang, and filler words. Do not blur or censor any profanity; accuracy is the priority.',
-                                '2. **Language Handling:** If the speaker uses two different languages, keep them separate in the text and do not translate them.',
-                                '3. **Formatting:** Analyze the tone. If the speaker sounds official or serious, use proper capitalization and punctuation. If the speaker is casual, feel free to use lowercase or loose punctuation to match the vibe.',
-                            ].join('\n'),
-                        },
-                    ],
+    const response = await ky.post(
+        `https://api.cloudflare.com/client/v4/accounts/${Bun.env.CLOUDFLARE_ACCOUNT_ID}/ai/run`,
+        {
+            headers: { Authorization: `Bearer ${Bun.env.CLOUDFLARE_API_KEY}` },
+            json: {
+                model: 'assemblyai/universal-3-pro',
+                input: {
+                    audio_url: audio.url,
+                    speaker_labels: true,
+                    disfluencies: true,
                 },
-            ],
-        });
+            },
+            timeout: 60000,
+            throwHttpErrors: false,
+        },
+    );
 
-        let text = '';
-        let error: string | null = null;
+    if (!response.ok) {
+        consola.error(`audio_to_text: ${await response.text()}`);
 
-        for await (const chunk of stream) {
-            if (chunk.type === 'TEXT_MESSAGE_CONTENT' && chunk.delta) text += chunk.delta;
-            if (chunk.type === 'RUN_ERROR') error = parseError(chunk.error?.message || 'Unknown error');
-        }
-
-        text = text.trim();
-
-        if (error || !text) {
-            const message = error || 'Empty response';
-            consola.warn(`audio_to_text: ${message}`);
-
-            const empty = new TextDisplayBuilder().setContent(message);
-
-            return interaction.editReply({
-                components: [empty],
-                flags: MessageFlags.IsComponentsV2,
-            });
-        }
-
-        consola.info(`audio_to_text: transcription complete (${text.length} chars)`);
-
-        const result = new TextDisplayBuilder().setContent(`**Transcription:**\n${text}`);
+        const failed = new TextDisplayBuilder().setContent('Failed to transcribe audio');
 
         return interaction.editReply({
-            components: [result],
-            flags: MessageFlags.IsComponentsV2,
-        });
-    } catch (err) {
-        consola.error(`audio_to_text: ${err}`);
-
-        const errorText = new TextDisplayBuilder().setContent('Failed to transcribe audio');
-
-        return interaction.editReply({
-            components: [errorText],
+            components: [failed],
             flags: MessageFlags.IsComponentsV2,
         });
     }
+
+    const {
+        result: { result },
+    } = await response.json<{
+        result: {
+            result: {
+                text: string;
+                utterances?: { text: string; speaker: string }[] | null;
+            };
+        };
+    }>();
+
+    consola.info('audio_to_text: transcription complete');
+
+    const transcription = new TextDisplayBuilder().setContent(
+        [
+            '**Transcription:**',
+            result.utterances &&
+            result.utterances.length > 0 &&
+            new Set(result.utterances.map((u) => u.speaker)).size > 1
+                ? result.utterances
+                      .map((utterance) => `Speaker ${utterance.speaker}: ${replaceWords(utterance.text)}`)
+                      .join('\n')
+                : replaceWords(result.text),
+        ].join('\n'),
+    );
+
+    return interaction.editReply({
+        components: [transcription],
+        flags: MessageFlags.IsComponentsV2,
+    });
 };
