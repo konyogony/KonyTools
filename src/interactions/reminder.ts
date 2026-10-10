@@ -43,9 +43,8 @@ export const run = async (interaction: ChatInputCommandInteraction) => {
             const content = interaction.options.getString('content', true);
             const timeString = interaction.options.getString('time', true);
 
-            const regex =
-                /^\d{4}\/(0?[1-9]|1[0-2])\/(0?[1-9]|[12][0-9]|3[01]) (00|[0-9]|1[0-9]|2[0-3]):([0-9]|[0-5][0-9])$/;
-
+           const regex = /^\d{4}\/(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]$/;
+            
             if (!regex.test(timeString)) {
                 const text = new TextDisplayBuilder().setContent(
                     'Invalid time format. Please use the format "YYYY/MM/DD HH:mm" (e.g. 2024/09/11 16:14).',
